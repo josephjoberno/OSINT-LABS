@@ -94,6 +94,8 @@
       </nav>
 
       <div class="sidebar-footer">
+        <button type="button" class="btn btn-secondary btn-block" id="open-news">Actualites OSINT</button>
+        <button type="button" class="btn btn-primary btn-block" id="open-challenges">Labs &amp; Challenges</button>
         <button type="button" class="btn btn-secondary" id="open-xterm">Terminal integre</button>
         <button type="button" class="btn btn-ghost btn-block" id="open-board">Tableau d'annotations</button>
         <button type="button" class="btn btn-ghost btn-block" id="open-files">Fichiers (Filebrowser)</button>
@@ -147,6 +149,7 @@
           <div class="tools-search">
             <input type="search" id="tool-search" placeholder="Rechercher un outil (nom, description, categorie)..." autocomplete="off">
           </div>
+          <button type="button" class="btn btn-secondary" id="open-dork-builder">Google Dork Builder</button>
         </div>
 
         <div class="tools-groups" id="tools-grid">
@@ -250,6 +253,15 @@
         <button type="button" class="btn btn-danger" id="confirm-reset">Reinitialiser</button>
       </div>
       <div class="terminal-output system-output" id="system-output"></div>
+      <div class="system-progress hidden" id="system-progress" aria-live="polite">
+        <div class="system-progress-copy">
+          <span id="system-progress-label">Preparation</span>
+          <strong id="system-progress-value">0 %</strong>
+        </div>
+        <div class="system-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <span id="system-progress-bar"></span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -266,6 +278,37 @@
       <div class="graph-modal-body">
         <div id="entity-graph-large" class="entity-graph entity-graph-large" aria-label="Graphe des entites agrandi"></div>
       </div>
+    </div>
+  </div>
+
+  <div class="help-modal hidden" id="dork-modal" role="dialog" aria-modal="true" aria-labelledby="dork-title">
+    <div class="help-modal-backdrop" id="dork-backdrop"></div>
+    <div class="help-modal-content dork-modal-content">
+      <div class="help-modal-header">
+        <div>
+          <h3 id="dork-title">Google Dork Builder</h3>
+          <p class="help-summary">Composez une requete ciblee, ouvrez-la dans Google ou recherchez ses sources publiques avec OpenRouter.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" id="close-dork">Fermer</button>
+      </div>
+      <form id="dork-form" class="dork-form">
+        <div class="dork-fields">
+          <label>Site ou domaine<input id="dork-site" type="text" maxlength="300" placeholder="example.org" autocomplete="off"></label>
+          <label>Mots cles<input id="dork-terms" type="text" maxlength="300" placeholder="rapport annuel" autocomplete="off"></label>
+          <label>Expression exacte<input id="dork-exact" type="text" maxlength="300" placeholder="nom complet" autocomplete="off"></label>
+          <label>Type de fichier<input id="dork-filetype" type="text" maxlength="12" placeholder="pdf" autocomplete="off"></label>
+          <label>Dans le titre<input id="dork-intitle" type="text" maxlength="300" placeholder="documentation" autocomplete="off"></label>
+          <label>Dans l'adresse URL<input id="dork-inurl" type="text" maxlength="300" placeholder="archive" autocomplete="off"></label>
+          <label class="dork-wide">Exclusions<input id="dork-exclude" type="text" maxlength="300" placeholder="mot1, mot2" autocomplete="off"></label>
+        </div>
+        <label for="dork-preview">Requete generee</label>
+        <output id="dork-preview" class="dork-preview">Ajoutez un critere pour commencer.</output>
+        <div class="dork-actions">
+          <button type="button" class="btn btn-ghost" id="dork-open-google">Ouvrir dans Google</button>
+          <button type="submit" class="btn btn-primary" id="dork-index">Rechercher et indexer</button>
+        </div>
+        <div id="dork-status" class="dork-status muted" aria-live="polite"></div>
+      </form>
     </div>
   </div>
 
@@ -332,6 +375,68 @@
             <button class="btn btn-primary" type="submit">Envoyer</button>
           </form>
         </aside>
+      </div>
+    </div>
+  </div>
+
+  <div class="help-modal hidden" id="news-modal" role="dialog" aria-modal="true" aria-labelledby="news-title">
+    <div class="help-modal-backdrop" id="news-backdrop"></div>
+    <div class="help-modal-content news-modal-content">
+      <div class="help-modal-header">
+        <div>
+          <h3 id="news-title">Actualites OSINT</h3>
+          <p class="help-summary" id="news-summary">Outils et recherches issus de sources officielles.</p>
+        </div>
+        <div class="panel-actions">
+          <button type="button" class="btn btn-secondary btn-sm" id="refresh-news">Actualiser</button>
+          <button type="button" class="btn btn-ghost" id="close-news">Fermer</button>
+        </div>
+      </div>
+      <div class="news-body">
+        <div class="news-toolbar" role="group" aria-label="Filtrer les actualites">
+          <button type="button" class="btn btn-ghost btn-sm is-active" data-news-filter="all">Tous</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-news-filter="tool">Outils</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-news-filter="research">Recherches</button>
+        </div>
+        <p class="news-status muted" id="news-status" aria-live="polite"></p>
+        <div class="news-list" id="news-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="help-modal hidden" id="challenges-modal" role="dialog" aria-modal="true" aria-labelledby="challenges-title">
+    <div class="help-modal-backdrop" id="challenges-backdrop"></div>
+    <div class="help-modal-content challenges-modal-content">
+      <div class="help-modal-header">
+        <div>
+          <h3 id="challenges-title">Labs &amp; Challenges</h3>
+          <p class="help-summary" id="challenges-summary">Exercices pratiques OSINT dans un cadre legal et passif.</p>
+        </div>
+        <div class="panel-actions">
+          <div class="language-switch" role="group" aria-label="Langue">
+            <button type="button" class="btn btn-ghost btn-sm is-active" data-lab-lang="fr">FR</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-lab-lang="en">EN</button>
+          </div>
+          <button type="button" class="btn btn-ghost" id="close-challenges">Fermer</button>
+        </div>
+      </div>
+      <div class="challenges-body">
+        <div class="challenges-intro">
+          <div>
+            <strong id="challenge-progress-label">Progression du projet</strong>
+            <span id="challenge-progress-count">0 / 0</span>
+          </div>
+          <div class="challenge-progress-track"><span id="challenge-progress-bar"></span></div>
+          <p id="challenges-safety">Travaillez uniquement sur des donnees publiques, des cibles autorisees ou les environnements proposes. Aucun contact, contournement d'acces ou collecte intrusive.</p>
+        </div>
+        <div class="challenge-layout">
+          <section><div id="challenge-list" class="challenge-list"></div></section>
+          <aside class="challenge-resources">
+            <h4 id="challenge-resources-title">Ressources pour pratiquer</h4>
+            <p class="muted" id="challenge-resources-copy">Consultez les regles et le perimetre de chaque plateforme avant de commencer.</p>
+            <div id="challenge-resource-list"></div>
+          </aside>
+        </div>
       </div>
     </div>
   </div>

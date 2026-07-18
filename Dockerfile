@@ -58,7 +58,8 @@ RUN pip3 install --no-cache-dir \
     h8mail \
     social-analyzer \
     waybackpy \
-    snscrape
+    snscrape \
+    "yente-client[cli]"
 
 # --- Blackbird ---
 RUN git clone --depth 1 https://github.com/p1ngul1n0/blackbird.git /opt/blackbird \

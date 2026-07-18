@@ -12,6 +12,9 @@ OSINT Labs est un environnement local et open source pour organiser une investig
 - couche de dessin pour annotations visuelles
 - assistant OpenRouter conscient du contexte du projet
 - recherche web OpenRouter volontaire avec sources
+- Google Dork Builder avec aperçu, ouverture Google et indexation des sources citées
+- Labs & Challenges bilingues avec progression SQLite par projet
+- fil d'actualites sur les outils et recherches OSINT, avec sources officielles et cache SQLite
 - outils OSINT pour usernames, emails, domaines, images, géolocalisation, archives et réputation
 - proxy Tor isolé, jamais appliqué globalement
 - stockage central SQLite sur un volume Docker
@@ -41,6 +44,18 @@ Ouvrez [http://localhost:8080](http://localhost:8080). Le service écoute unique
 5. Déplacez, masquez ou annotez les éléments selon les besoins de l'enquête.
 6. Configurez OpenRouter pour interroger l'assistant avec le contexte du projet.
 
+## Google Dork Builder
+
+Le générateur construit des requêtes avec `site:`, `filetype:`, `intitle:`, `inurl:`, expression exacte et exclusions. Il peut ouvrir la requête dans Google sans scraper le moteur.
+
+Avec OpenRouter configuré, l'action « Rechercher et indexer » utilise la recherche web, extrait les URLs citées, conserve leur provenance et les ajoute automatiquement au projet et au canvas.
+
+## Labs & Challenges
+
+L'espace de pratique propose des exercices en français et en anglais avec difficulté, objectif, étapes, indice, réponse et état de complétion. La progression est enregistrée dans SQLite pour chaque projet.
+
+Les exercices intégrés couvrent la vérification d'une publication, le GEOINT, la recherche d'image inversée et la chronologie passive d'un domaine. Des liens d'inscription et d'apprentissage sont fournis pour OSINTopia, OSINT UK CTF, OSINT Industries CTF, Trace Labs, Bellingcat, TryHackMe, Hack The Box Academy, GeoGuessr et MapCrunch.
+
 ## Sources et outils
 
 Le catalogue inclut notamment:
@@ -53,8 +68,12 @@ Le catalogue inclut notamment:
 - GEOINT: OpenStreetMap, Google Earth, Mapillary, SunCalc, GeoHints, NASA Worldview, EO Browser, OpenTopography, ADS-B Exchange et MarineTraffic
 - vérification: urlscan.io, VirusTotal, AbuseIPDB, crt.sh et Wayback Machine
 - investigation: Seekr, SpiderFoot et Recon-ng
+- apprentissage: communauté, lexique et challenges francophones OSINTopia
+- outils Bellingcat actifs en 2026: Auto Archiver, OSM Search, Geoclustering, ShadowFinder, AIS Imagery Search, ADS-B History, Name Variant Search, Uniform Timezone, Octosuite, Sugartrail, CouncilSearcher et RS4OSINT
 
 Les services web externes s'ouvrent dans leur site officiel. Vérifiez leurs conditions d'utilisation avant d'envoyer une donnée personnelle ou un fichier sensible.
+
+Les cartes `CLI` et `Terminal` correspondent à des outils installés dans l'image. Les cartes `Web` ouvrent des services externes qui ne sont pas distribués pour une installation locale. Le bouton de mise à jour couvre les paquets Ubuntu, Python, Go, les dépôts Git, Social Analyzer, Yente CLI et les modèles Nuclei, avec une progression en direct. Les images Docker séparées se mettent à jour depuis l'hôte avec `docker compose pull` puis `docker compose up -d --build`.
 
 ## Assistant IA
 

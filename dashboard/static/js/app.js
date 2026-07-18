@@ -1,4 +1,7 @@
 (() => {
+  document.addEventListener("keydown", () => document.body.classList.add("keyboard-input"), { passive: true });
+  document.addEventListener("pointerdown", () => document.body.classList.remove("keyboard-input"), { passive: true });
+
   const projectGate = document.getElementById("project-gate");
   const workspace = document.getElementById("workspace");
   const createProjectForm = document.getElementById("create-project-form");
@@ -16,6 +19,10 @@
   const systemModalTitle = document.getElementById("system-modal-title");
   const systemModalDesc = document.getElementById("system-modal-desc");
   const systemOutput = document.getElementById("system-output");
+  const systemProgress = document.getElementById("system-progress");
+  const systemProgressLabel = document.getElementById("system-progress-label");
+  const systemProgressValue = document.getElementById("system-progress-value");
+  const systemProgressBar = document.getElementById("system-progress-bar");
   const resetFormWrap = document.getElementById("reset-form-wrap");
   const resetConfirm = document.getElementById("reset-confirm");
   const confirmReset = document.getElementById("confirm-reset");
@@ -23,6 +30,15 @@
   const categoryNav = document.getElementById("category-nav");
   const toolsGrid = document.getElementById("tools-grid");
   const toolSearch = document.getElementById("tool-search");
+  const openDorkBuilder = document.getElementById("open-dork-builder");
+  const dorkModal = document.getElementById("dork-modal");
+  const dorkBackdrop = document.getElementById("dork-backdrop");
+  const closeDork = document.getElementById("close-dork");
+  const dorkForm = document.getElementById("dork-form");
+  const dorkPreview = document.getElementById("dork-preview");
+  const dorkOpenGoogle = document.getElementById("dork-open-google");
+  const dorkIndex = document.getElementById("dork-index");
+  const dorkStatus = document.getElementById("dork-status");
   const sectionTitle = document.getElementById("section-title");
   const sectionDesc = document.getElementById("section-desc");
   const runPanel = document.getElementById("run-panel");
@@ -91,6 +107,23 @@
   const chatMessages = document.getElementById("chat-messages");
   const chatForm = document.getElementById("chat-form");
   const chatInput = document.getElementById("chat-input");
+  const openChallenges = document.getElementById("open-challenges");
+  const challengesModal = document.getElementById("challenges-modal");
+  const challengesBackdrop = document.getElementById("challenges-backdrop");
+  const closeChallenges = document.getElementById("close-challenges");
+  const challengeList = document.getElementById("challenge-list");
+  const challengeResourceList = document.getElementById("challenge-resource-list");
+  const openNews = document.getElementById("open-news");
+  const newsModal = document.getElementById("news-modal");
+  const newsBackdrop = document.getElementById("news-backdrop");
+  const closeNews = document.getElementById("close-news");
+  const refreshNews = document.getElementById("refresh-news");
+  const newsList = document.getElementById("news-list");
+  const newsStatus = document.getElementById("news-status");
+  let challengeData = { challenges: [], resources: [], progress: {} };
+  let newsData = [];
+  let newsFilter = "all";
+  let labLanguage = localStorage.getItem("osint-labs-language") === "en" ? "en" : "fr";
   let pendingAiActionId = null;
 
   let activeCategory = "all";
@@ -964,6 +997,14 @@
         try {
           const payload = JSON.parse(part.trim().slice(6));
           if (payload.line) appendTo(systemOutput, payload.line);
+          if (payload.type === "progress") {
+            const percent = Math.max(0, Math.min(100, Number(payload.percent) || 0));
+            systemProgress?.classList.remove("hidden");
+            if (systemProgressLabel) systemProgressLabel.textContent = payload.label || "Mise a jour";
+            if (systemProgressValue) systemProgressValue.textContent = `${percent} %`;
+            if (systemProgressBar) systemProgressBar.style.width = `${percent}%`;
+            systemProgress?.querySelector('[role="progressbar"]')?.setAttribute("aria-valuenow", String(percent));
+          }
           if (payload.type === "done") {
             appendTo(systemOutput, `Termine (code ${payload.exit_code})`, payload.exit_code === 0 ? "success" : "error");
           }
@@ -979,6 +1020,10 @@
       "Mettre a jour le systeme",
       "Mise a jour pip, Go, git et templates dans le conteneur. Les images Docker externes (Seekr, Web-Check) ne sont pas mises a jour ici."
     );
+    systemProgress?.classList.remove("hidden");
+    if (systemProgressLabel) systemProgressLabel.textContent = "Preparation";
+    if (systemProgressValue) systemProgressValue.textContent = "0 %";
+    if (systemProgressBar) systemProgressBar.style.width = "0%";
     await streamSystemEndpoint("/api/system/update");
   });
 
@@ -1269,6 +1314,72 @@
     await openCliPrompt(card.dataset.toolId);
   });
 
+  const dorkFieldIds = ["site", "terms", "exact", "filetype", "intitle", "inurl", "exclude"];
+
+  function dorkPayload(index = false) {
+    const payload = { index };
+    dorkFieldIds.forEach((field) => {
+      payload[field] = document.getElementById(`dork-${field}`).value.trim();
+    });
+    return payload;
+  }
+
+  async function buildDork(index = false) {
+    const response = await fetch("/api/projects/google-dork", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dorkPayload(index)),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "La recherche a echoue");
+    return data;
+  }
+
+  async function refreshDorkPreview() {
+    try {
+      const data = await buildDork(false);
+      dorkPreview.textContent = data.query;
+      dorkOpenGoogle.disabled = false;
+    } catch (error) {
+      dorkPreview.textContent = "Ajoutez un critere pour commencer.";
+      dorkOpenGoogle.disabled = true;
+    }
+  }
+
+  dorkFieldIds.forEach((field) => document.getElementById(`dork-${field}`)?.addEventListener("input", refreshDorkPreview));
+  openDorkBuilder?.addEventListener("click", () => {
+    dorkModal.classList.remove("hidden");
+    refreshDorkPreview();
+  });
+  [closeDork, dorkBackdrop].forEach((element) => element?.addEventListener("click", () => dorkModal.classList.add("hidden")));
+  dorkOpenGoogle?.addEventListener("click", async () => {
+    try {
+      const data = await buildDork(false);
+      window.open(data.google_url, "_blank", "noopener");
+    } catch (error) {
+      dorkStatus.textContent = error.message;
+    }
+  });
+  dorkForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    dorkIndex.disabled = true;
+    dorkStatus.textContent = "Recherche des sources publiques en cours...";
+    try {
+      const data = await buildDork(true);
+      dorkPreview.textContent = data.query;
+      dorkStatus.textContent = `${data.indexed_count} source(s) indexee(s) dans le projet et le canvas.`;
+      investigationContext = data.context;
+      renderEntityList(investigationContext.top_entities || []);
+      fillTargetSuggestions(investigationContext.top_entities || []);
+      renderContextGraph(investigationContext.graph || { nodes: [], edges: [] });
+      if (!boardModal.classList.contains("hidden")) await renderBoard();
+    } catch (error) {
+      dorkStatus.textContent = error.message;
+    } finally {
+      dorkIndex.disabled = false;
+    }
+  });
+
   closePanel.addEventListener("click", () => {
     stopCurrentJob();
     runPanel.classList.add("hidden");
@@ -1398,6 +1509,108 @@
   clearHistory.addEventListener("click", async () => {
     await fetch("/api/history", { method: "DELETE" });
     await loadHistory();
+  });
+
+  const labCopy = {
+    fr: { summary: "Exercices pratiques OSINT dans un cadre legal et passif.", progress: "Progression du projet", safety: "Travaillez uniquement sur des donnees publiques, des cibles autorisees ou les environnements proposes. Aucun contact, contournement d'acces ou collecte intrusive.", resources: "Ressources pour pratiquer", resourceCopy: "Consultez les regles et le perimetre de chaque plateforme avant de commencer.", steps: "Etapes", hint: "Indice", save: "Enregistrer", complete: "Termine", saved: "Progression enregistree", difficulties: { beginner: "Debutant", intermediate: "Intermediaire", advanced: "Avance" } },
+    en: { summary: "Practical OSINT exercises within a legal, passive scope.", progress: "Project progress", safety: "Work only with public data, authorized targets or the provided training environments. Do not contact subjects, bypass access controls or collect intrusively.", resources: "Practice resources", resourceCopy: "Review each platform's rules and scope before you begin.", steps: "Steps", hint: "Hint", save: "Save", complete: "Completed", saved: "Progress saved", difficulties: { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" } },
+  };
+
+  const newsCopy = {
+    fr: { loading: "Chargement des sources officielles...", empty: "Aucune actualite dans cette categorie.", error: "Les actualites sont temporairement indisponibles.", stale: "Derniere copie disponible, certaines sources ne repondent pas.", updated: "Sources actualisees", tool: "Outil", research: "Recherche", read: "Consulter la source" },
+    en: { loading: "Loading official sources...", empty: "No news in this category.", error: "News is temporarily unavailable.", stale: "Showing the latest available copy because some sources did not respond.", updated: "Sources updated", tool: "Tool", research: "Research", read: "Open source" },
+  };
+
+  function renderNews() {
+    const copy = newsCopy[labLanguage];
+    const items = newsFilter === "all" ? newsData : newsData.filter((item) => item.type === newsFilter);
+    document.querySelectorAll("[data-news-filter]").forEach((button) => button.classList.toggle("is-active", button.dataset.newsFilter === newsFilter));
+    if (!items.length) {
+      newsList.innerHTML = `<div class="news-empty">${escapeHtml(copy.empty)}</div>`;
+      return;
+    }
+    newsList.innerHTML = items.map((item) => {
+      const date = new Intl.DateTimeFormat(labLanguage === "fr" ? "fr-CA" : "en-CA", { dateStyle: "medium" }).format(new Date(item.published_at));
+      return `<article class="news-card">
+        <div class="news-card-meta"><span>${escapeHtml(copy[item.type] || item.type)}</span><span>${escapeHtml(item.source)}</span><time datetime="${escapeHtml(item.published_at)}">${escapeHtml(date)}</time></div>
+        <h4>${escapeHtml(item.title)}</h4>
+        ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
+        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(copy.read)}</a>
+      </article>`;
+    }).join("");
+  }
+
+  async function loadNews(force = false) {
+    const copy = newsCopy[labLanguage];
+    newsStatus.textContent = copy.loading;
+    newsList.innerHTML = '<div class="news-loading"><span></span><span></span><span></span></div>';
+    refreshNews.disabled = true;
+    try {
+      const response = await fetch(`/api/news${force ? "?refresh=1" : ""}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || copy.error);
+      newsData = data.items || [];
+      newsStatus.textContent = data.stale ? copy.stale : `${copy.updated}: ${new Intl.DateTimeFormat(labLanguage === "fr" ? "fr-CA" : "en-CA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(data.fetched_at))}`;
+      renderNews();
+    } catch (error) {
+      newsStatus.textContent = error.message || copy.error;
+      newsList.innerHTML = `<div class="news-empty">${escapeHtml(copy.error)}</div>`;
+    } finally {
+      refreshNews.disabled = false;
+    }
+  }
+
+  openNews?.addEventListener("click", () => { newsModal.classList.remove("hidden"); loadNews(); });
+  [closeNews, newsBackdrop].forEach((el) => el?.addEventListener("click", () => newsModal.classList.add("hidden")));
+  refreshNews?.addEventListener("click", () => loadNews(true));
+  document.querySelectorAll("[data-news-filter]").forEach((button) => button.addEventListener("click", () => { newsFilter = button.dataset.newsFilter; renderNews(); }));
+
+  function renderChallenges() {
+    const copy = labCopy[labLanguage];
+    document.getElementById("challenges-summary").textContent = copy.summary;
+    document.getElementById("challenge-progress-label").textContent = copy.progress;
+    document.getElementById("challenges-safety").textContent = copy.safety;
+    document.getElementById("challenge-resources-title").textContent = copy.resources;
+    document.getElementById("challenge-resources-copy").textContent = copy.resourceCopy;
+    document.querySelectorAll("[data-lab-lang]").forEach((button) => button.classList.toggle("is-active", button.dataset.labLang === labLanguage));
+    const completed = challengeData.challenges.filter((item) => challengeData.progress[item.id]?.completed).length;
+    document.getElementById("challenge-progress-count").textContent = `${completed} / ${challengeData.challenges.length}`;
+    document.getElementById("challenge-progress-bar").style.width = challengeData.challenges.length ? `${completed / challengeData.challenges.length * 100}%` : "0%";
+    challengeList.innerHTML = challengeData.challenges.map((challenge) => {
+      const progress = challengeData.progress[challenge.id] || {};
+      return `<article class="challenge-card" data-challenge-id="${escapeHtml(challenge.id)}">
+        <div class="challenge-card-head"><h4>${escapeHtml(challenge.title[labLanguage])}</h4><span>${escapeHtml(copy.difficulties[challenge.difficulty])}</span></div>
+        <p>${escapeHtml(challenge.objective[labLanguage])}</p>
+        <details><summary>${copy.steps}</summary><ol>${challenge.steps[labLanguage].map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ol><p class="challenge-hint"><strong>${copy.hint}:</strong> ${escapeHtml(challenge.hint[labLanguage])}</p></details>
+        <label>${escapeHtml(challenge.answer_label[labLanguage])}<textarea rows="3" maxlength="8000">${escapeHtml(progress.answer || "")}</textarea></label>
+        <div class="challenge-card-actions"><label><input type="checkbox" ${progress.completed ? "checked" : ""}> ${copy.complete}</label><button type="button" class="btn btn-secondary btn-sm">${copy.save}</button><span aria-live="polite"></span></div>
+      </article>`;
+    }).join("");
+    challengeResourceList.innerHTML = challengeData.resources.map((resource) => `<a class="challenge-resource" href="${escapeHtml(resource.url)}" target="_blank" rel="noopener noreferrer"><strong>${escapeHtml(resource.name)}</strong><span>${escapeHtml(resource.description[labLanguage])}</span></a>`).join("");
+  }
+
+  async function loadChallenges() {
+    const response = await fetch("/api/projects/challenges");
+    if (!response.ok) return;
+    challengeData = await response.json();
+    renderChallenges();
+  }
+
+  openChallenges?.addEventListener("click", async () => { challengesModal.classList.remove("hidden"); await loadChallenges(); });
+  [closeChallenges, challengesBackdrop].forEach((el) => el?.addEventListener("click", () => challengesModal.classList.add("hidden")));
+  document.querySelectorAll("[data-lab-lang]").forEach((button) => button.addEventListener("click", () => { labLanguage = button.dataset.labLang; localStorage.setItem("osint-labs-language", labLanguage); renderChallenges(); }));
+  challengeList?.addEventListener("click", async (event) => {
+    const button = event.target.closest("button");
+    if (!button) return;
+    const card = button.closest("[data-challenge-id]");
+    const response = await fetch(`/api/projects/challenges/${encodeURIComponent(card.dataset.challengeId)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answer: card.querySelector("textarea").value, completed: card.querySelector('input[type="checkbox"]').checked }) });
+    if (!response.ok) return;
+    const data = await response.json();
+    challengeData.progress[card.dataset.challengeId] = data.progress;
+    card.querySelector(".challenge-card-actions span").textContent = labCopy[labLanguage].saved;
+    const completed = challengeData.challenges.filter((item) => challengeData.progress[item.id]?.completed).length;
+    document.getElementById("challenge-progress-count").textContent = `${completed} / ${challengeData.challenges.length}`;
+    document.getElementById("challenge-progress-bar").style.width = `${completed / challengeData.challenges.length * 100}%`;
   });
 
   initApp();

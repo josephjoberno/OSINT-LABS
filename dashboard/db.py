@@ -151,6 +151,21 @@ def init_db() -> None:
                     launched_at TEXT
                 );
 
+                CREATE TABLE IF NOT EXISTS challenge_progress (
+                    project_id TEXT NOT NULL,
+                    challenge_id TEXT NOT NULL,
+                    answer TEXT NOT NULL DEFAULT '',
+                    completed INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT,
+                    PRIMARY KEY (project_id, challenge_id)
+                );
+
+                CREATE TABLE IF NOT EXISTS news_cache (
+                    cache_key TEXT PRIMARY KEY,
+                    payload_json TEXT NOT NULL,
+                    fetched_at TEXT NOT NULL
+                );
+
                 CREATE INDEX IF NOT EXISTS idx_findings_project ON findings(project_id);
                 CREATE INDEX IF NOT EXISTS idx_scans_project ON scans(project_id);
                 CREATE INDEX IF NOT EXISTS idx_annotations_project ON annotations(project_id);
@@ -158,6 +173,7 @@ def init_db() -> None:
                 CREATE INDEX IF NOT EXISTS idx_canvas_edges_project ON canvas_edges(project_id);
                 CREATE INDEX IF NOT EXISTS idx_chat_messages_thread ON chat_messages(project_id, thread_id, created_at);
                 CREATE INDEX IF NOT EXISTS idx_ai_tool_actions_project ON ai_tool_actions(project_id, created_at);
+                CREATE INDEX IF NOT EXISTS idx_challenge_progress_project ON challenge_progress(project_id, updated_at);
                 """
             )
         _initialized = True
@@ -195,7 +211,7 @@ def sync_project(project: dict) -> None:
 def delete_project(project_id: str) -> None:
     init_db()
     with _lock, _connect() as conn:
-        for table in ("ai_tool_actions", "chat_messages", "ai_settings", "canvas_drawings", "canvas_edges", "canvas_nodes", "annotations", "scans", "findings", "projects"):
+        for table in ("challenge_progress", "ai_tool_actions", "chat_messages", "ai_settings", "canvas_drawings", "canvas_edges", "canvas_nodes", "annotations", "scans", "findings", "projects"):
             conn.execute(
                 f"DELETE FROM {table} WHERE {'id' if table == 'projects' else 'project_id'} = ?",
                 (project_id,),
@@ -207,7 +223,7 @@ def clear_project_research(project_id: str) -> None:
     init_db()
     with _lock, _connect() as conn:
         for table in (
-            "ai_tool_actions", "chat_messages", "canvas_drawings", "canvas_edges", "canvas_nodes", "annotations",
+            "challenge_progress", "ai_tool_actions", "chat_messages", "canvas_drawings", "canvas_edges", "canvas_nodes", "annotations",
             "scans", "findings",
         ):
             conn.execute(f"DELETE FROM {table} WHERE project_id = ?", (project_id,))
@@ -218,7 +234,7 @@ def clear_all() -> None:
     init_db()
     with _lock, _connect() as conn:
         for table in (
-            "ai_tool_actions", "chat_messages", "ai_settings", "canvas_drawings", "canvas_edges", "canvas_nodes",
+            "news_cache", "challenge_progress", "ai_tool_actions", "chat_messages", "ai_settings", "canvas_drawings", "canvas_edges", "canvas_nodes",
             "annotations", "scans", "findings", "projects",
         ):
             conn.execute(f"DELETE FROM {table}")
@@ -239,6 +255,36 @@ def record_finding(project_id: str, ftype: str, value: str, source_tool: str = "
             """,
             (str(uuid.uuid4()), project_id, ftype, value, source_tool, _now()),
         )
+
+
+def get_challenge_progress(project_id: str) -> dict[str, dict]:
+    init_db()
+    with _connect() as conn:
+        rows = conn.execute(
+            "SELECT challenge_id, answer, completed, updated_at FROM challenge_progress WHERE project_id = ?",
+            (project_id,),
+        ).fetchall()
+    return {
+        row["challenge_id"]: {
+            "answer": row["answer"],
+            "completed": bool(row["completed"]),
+            "updated_at": row["updated_at"],
+        }
+        for row in rows
+    }
+
+
+def save_challenge_progress(project_id: str, challenge_id: str, answer: str, completed: bool) -> dict:
+    init_db()
+    updated_at = _now()
+    with _lock, _connect() as conn:
+        conn.execute(
+            "INSERT INTO challenge_progress(project_id, challenge_id, answer, completed, updated_at) "
+            "VALUES (?, ?, ?, ?, ?) ON CONFLICT(project_id, challenge_id) DO UPDATE SET "
+            "answer=excluded.answer, completed=excluded.completed, updated_at=excluded.updated_at",
+            (project_id, challenge_id, answer, int(completed), updated_at),
+        )
+    return {"answer": answer, "completed": completed, "updated_at": updated_at}
 
 
 def get_findings(project_id: str, limit: int = 200) -> list[dict]:
@@ -521,3 +567,25 @@ def delete_annotation(project_id: str, ann_id: str) -> None:
             "DELETE FROM annotations WHERE id = ? AND project_id = ?",
             (ann_id, project_id),
         )
+
+
+def get_news_cache(cache_key: str = "official") -> dict | None:
+    init_db()
+    with _lock, _connect() as conn:
+        row = conn.execute("SELECT payload_json, fetched_at FROM news_cache WHERE cache_key = ?", (cache_key,)).fetchone()
+    if not row:
+        return None
+    return {"items": json.loads(row["payload_json"]), "fetched_at": row["fetched_at"]}
+
+
+def save_news_cache(items: list[dict], cache_key: str = "official") -> dict:
+    init_db()
+    fetched_at = _now()
+    payload = json.dumps(items, ensure_ascii=False, separators=(",", ":"))
+    with _lock, _connect() as conn:
+        conn.execute(
+            "INSERT INTO news_cache(cache_key, payload_json, fetched_at) VALUES (?, ?, ?) "
+            "ON CONFLICT(cache_key) DO UPDATE SET payload_json=excluded.payload_json, fetched_at=excluded.fetched_at",
+            (cache_key, payload, fetched_at),
+        )
+    return {"items": items, "fetched_at": fetched_at}

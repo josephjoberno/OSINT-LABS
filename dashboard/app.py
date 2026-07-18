@@ -11,6 +11,7 @@ import threading
 import time
 import uuid
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,6 +41,8 @@ from projects import (
 )
 
 import db
+from challenges import CHALLENGES, RESOURCES
+from news import fetch_all as fetch_news
 
 APP_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.environ.get("OSINT_DATA_DIR", "/data"))
@@ -241,6 +244,70 @@ def _openrouter_chat(api_key: str, model: str, messages: list[dict], web_search:
         raise ValueError("Reponse OpenRouter invalide") from exc
     sources = message.get("annotations") or data.get("citations") or []
     return str(content), sources
+
+
+def _build_google_dork(payload: dict) -> str:
+    """Build a bounded Google query from structured, untrusted form values."""
+    fields = {
+        key: str(payload.get(key, "")).strip()
+        for key in ("site", "terms", "exact", "filetype", "intitle", "inurl", "exclude")
+    }
+    if any(len(value) > 300 for value in fields.values()):
+        raise ValueError("Un champ de recherche est trop long")
+
+    parts: list[str] = []
+    site = re.sub(r"^https?://", "", fields["site"], flags=re.IGNORECASE).strip(" /")
+    if site:
+        if not re.fullmatch(r"[A-Za-z0-9._*-]+(?::\d{1,5})?", site):
+            raise ValueError("Domaine invalide")
+        parts.append(f"site:{site}")
+    if fields["terms"]:
+        parts.append(fields["terms"])
+    if fields["exact"]:
+        parts.append(f'"{fields["exact"].replace(chr(34), "").strip()}"')
+    filetype = fields["filetype"].lower().lstrip(".")
+    if filetype:
+        if not re.fullmatch(r"[a-z0-9]{1,12}", filetype):
+            raise ValueError("Type de fichier invalide")
+        parts.append(f"filetype:{filetype}")
+    for operator in ("intitle", "inurl"):
+        value = fields[operator]
+        if value:
+            parts.append(f'{operator}:"{value.replace(chr(34), "").strip()}"')
+    for value in re.split(r"[,\s]+", fields["exclude"]):
+        clean = value.strip().lstrip("-")
+        if clean:
+            parts.append(f"-{clean}")
+
+    query = " ".join(parts).strip()
+    if not query:
+        raise ValueError("Ajoutez au moins un critere de recherche")
+    if len(query) > 1000:
+        raise ValueError("Requete trop longue")
+    return query
+
+
+def _annotation_urls(sources: object) -> list[str]:
+    """Extract public HTTP URLs from OpenRouter annotation variants."""
+    urls: list[str] = []
+    seen: set[str] = set()
+
+    def visit(value: object, key: str = "") -> None:
+        if isinstance(value, dict):
+            for child_key, child in value.items():
+                visit(child, str(child_key).lower())
+        elif isinstance(value, list):
+            for child in value:
+                visit(child, key)
+        elif isinstance(value, str) and (key in {"url", "uri", "link"} or value.startswith(("http://", "https://"))):
+            candidate = value.strip().rstrip(".,;)")
+            parsed = urllib.parse.urlparse(candidate)
+            if parsed.scheme in {"http", "https"} and parsed.netloc and candidate not in seen:
+                seen.add(candidate)
+                urls.append(candidate[:2048])
+
+    visit(sources)
+    return urls[:25]
 
 
 def _suggest_ai_tool(api_key: str, model: str, prompt: str, answer: str) -> dict | None:
@@ -667,6 +734,87 @@ def api_chat_tool_suggestion():
     return jsonify({"suggestion": {**suggestion, "action_id": action["id"]}}), 201
 
 
+@app.route("/api/projects/google-dork", methods=["POST"])
+def api_google_dork():
+    project, err = require_project()
+    if err:
+        return err
+    assert project is not None
+    payload = request.get_json(silent=True) or {}
+    try:
+        query = _build_google_dork(payload)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    if payload.get("index") is not True:
+        return jsonify({
+            "query": query,
+            "google_url": "https://www.google.com/search?" + urllib.parse.urlencode({"q": query}),
+        })
+
+    try:
+        settings = db.get_ai_settings(project["id"], _ai_secret(), include_key=True)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 500
+    api_key = settings.get("api_key")
+    if not api_key:
+        return jsonify({"error": "Configurez une cle OpenRouter dans l'assistant du projet"}), 409
+
+    messages = [{
+        "role": "user",
+        "content": (
+            "Effectue une recherche web publique correspondant exactement a la requete OSINT suivante. "
+            "Retourne une synthese factuelle concise. N'invente aucun resultat et conserve les sources "
+            "dans les annotations de la reponse. Requete: " + query
+        ),
+    }]
+    try:
+        answer, sources = _openrouter_chat(api_key, settings["model"], messages, True)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 502
+
+    urls = _annotation_urls(sources)
+    scan_id = str(uuid.uuid4())
+    started_at = datetime.now(timezone.utc).isoformat()
+    scan_entry = {
+        "id": scan_id,
+        "tool_id": "google_dork_builder",
+        "tool_name": "Google Dork Builder",
+        "target": query,
+        "command": "OpenRouter web search",
+        "exit_code": 0,
+        "started_at": started_at,
+        "output_preview": answer[:4000],
+    }
+    append_history(project["id"], scan_entry)
+    db.record_scan(project["id"], scan_entry)
+
+    workdir = _project_context_dir(project["id"])
+    ctx = load_context(workdir)
+    ingest_info = ingest_scan_result(
+        ctx,
+        tool_id="google_dork_builder",
+        tool_name="Google Dork Builder",
+        target=query,
+        output="\n".join(urls),
+    )
+    save_context(workdir, ctx)
+    db.record_finding(project["id"], "search_query", query, source_tool="google_dork_builder")
+    for url in urls:
+        db.record_finding(project["id"], "url", url, source_tool="google_dork_builder")
+    touch_project(DATA_DIR, project["id"])
+
+    return jsonify({
+        "query": query,
+        "answer": answer,
+        "sources": sources,
+        "indexed_urls": urls,
+        "indexed_count": len(urls),
+        "context": context_summary(ctx),
+        "discovered_count": ingest_info.get("discovered_count", 0),
+    }), 201
+
+
 @app.route("/api/projects/chat/tool-actions/<action_id>/confirm", methods=["POST"])
 def api_confirm_chat_tool_action(action_id: str):
     project, err = require_project()
@@ -931,7 +1079,13 @@ def api_system_update():
             assert proc.stdout is not None
             for line in iter(proc.stdout.readline, ""):
                 if line:
-                    yield f"data: {json.dumps({'type': 'output', 'line': line.rstrip()})}\n\n"
+                    clean_line = line.rstrip()
+                    progress_match = re.fullmatch(r"\[progress\]\s+(\d{1,3})\s+(.+)", clean_line)
+                    if progress_match:
+                        percent = max(0, min(100, int(progress_match.group(1))))
+                        yield f"data: {json.dumps({'type': 'progress', 'percent': percent, 'label': progress_match.group(2)})}\n\n"
+                    else:
+                        yield f"data: {json.dumps({'type': 'output', 'line': clean_line})}\n\n"
             proc.wait()
             status = "ok" if proc.returncode == 0 else "warning"
             save_system_meta(
@@ -1000,6 +1154,57 @@ def api_system_reset():
         return jsonify({"error": "Scope invalide (project ou all)"}), 400
     finally:
         _system_lock.release()
+
+
+@app.route("/api/projects/challenges")
+def api_project_challenges():
+    project, err = require_project()
+    if err:
+        return err
+    return jsonify({
+        "challenges": CHALLENGES,
+        "resources": RESOURCES,
+        "progress": db.get_challenge_progress(project["id"]),
+    })
+
+
+@app.route("/api/news")
+def api_news():
+    cached = db.get_news_cache()
+    force = request.args.get("refresh") == "1"
+    fresh = False
+    if cached:
+        try:
+            age = datetime.now(timezone.utc) - datetime.fromisoformat(cached["fetched_at"])
+            fresh = age.total_seconds() < 3600
+        except (TypeError, ValueError):
+            pass
+    if fresh and not force:
+        return jsonify({**cached, "cached": True, "stale": False, "failed_sources": []})
+    items, failed = fetch_news()
+    if items:
+        saved = db.save_news_cache(items)
+        return jsonify({**saved, "cached": False, "stale": bool(failed), "failed_sources": failed})
+    if cached:
+        return jsonify({**cached, "cached": True, "stale": True, "failed_sources": failed})
+    return jsonify({"error": "Sources d'actualites temporairement indisponibles", "items": [], "failed_sources": failed}), 503
+
+
+@app.route("/api/projects/challenges/<challenge_id>", methods=["PUT"])
+def api_project_challenge_progress(challenge_id: str):
+    project, err = require_project()
+    if err:
+        return err
+    if challenge_id not in {challenge["id"] for challenge in CHALLENGES}:
+        return jsonify({"error": "Challenge introuvable"}), 404
+    payload = request.get_json(silent=True) or {}
+    answer = str(payload.get("answer", "")).strip()
+    if len(answer) > 8000:
+        return jsonify({"error": "Reponse trop longue (max 8000 caracteres)"}), 400
+    progress = db.save_challenge_progress(
+        project["id"], challenge_id, answer, bool(payload.get("completed", False)),
+    )
+    return jsonify({"ok": True, "progress": progress})
 
 
 @app.route("/health")

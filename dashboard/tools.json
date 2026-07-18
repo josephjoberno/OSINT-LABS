@@ -98,6 +98,118 @@
   ],
   "tools": [
     {
+      "id": "bellingcat-toolkit",
+      "name": "Bellingcat Toolkit",
+      "category": "reference",
+      "description": "Catalogue maintenu d'outils d'enquete, avec usages, limites et conditions d'acces.",
+      "type": "web",
+      "url": "https://bellingcat.gitbook.io/toolkit"
+    },
+    {
+      "id": "bellingcat-auto-archiver",
+      "name": "Bellingcat Auto Archiver",
+      "category": "archive",
+      "description": "Archive des pages, images, videos et publications avec suivi de provenance.",
+      "type": "web",
+      "url": "https://github.com/bellingcat/auto-archiver"
+    },
+    {
+      "id": "bellingcat-osm-search",
+      "name": "Bellingcat OSM Search",
+      "category": "geoint",
+      "description": "Recherche des objets OpenStreetMap situes a proximite les uns des autres.",
+      "type": "web",
+      "url": "https://osm-search.bellingcat.com/"
+    },
+    {
+      "id": "bellingcat-geoclustering",
+      "name": "Bellingcat Geoclustering",
+      "category": "geoint",
+      "description": "Regroupe des coordonnees geographiques pour identifier des concentrations et tendances spatiales.",
+      "type": "web",
+      "url": "https://github.com/bellingcat/geoclustering"
+    },
+    {
+      "id": "bellingcat-shadowfinder",
+      "name": "Bellingcat ShadowFinder",
+      "category": "geoint",
+      "description": "Estime des zones possibles a partir de la direction et de la longueur des ombres.",
+      "type": "web",
+      "url": "https://colab.research.google.com/github/Bellingcat/ShadowFinder/blob/main/ShadowFinderColab.ipynb"
+    },
+    {
+      "id": "bellingcat-ais-imagery",
+      "name": "Bellingcat AIS Imagery Search",
+      "category": "geoint",
+      "description": "Croise des donnees de navires avec des images Sentinel et Landsat disponibles.",
+      "type": "web",
+      "url": "https://bellingcat.github.io/ais-imagery-search/"
+    },
+    {
+      "id": "bellingcat-adsb-history",
+      "name": "Bellingcat ADS-B History",
+      "category": "geoint",
+      "description": "Collecte et interroge des donnees ADS-B pour analyser des aeronefs et des tendances regionales.",
+      "type": "web",
+      "url": "https://github.com/bellingcat/adsb-history"
+    },
+    {
+      "id": "bellingcat-name-variants",
+      "name": "Bellingcat Name Variant Search",
+      "category": "search",
+      "description": "Genere et recherche des variantes courantes d'un nom pour elargir une recherche publique.",
+      "type": "web",
+      "url": "https://bellingcat.github.io/name-variant-search/"
+    },
+    {
+      "id": "bellingcat-uniform-timezone",
+      "name": "Bellingcat Uniform Timezone",
+      "category": "socmint",
+      "description": "Extension qui normalise les dates de plusieurs reseaux sociaux dans un meme fuseau horaire.",
+      "type": "web",
+      "url": "https://github.com/bellingcat/uniform-timezone"
+    },
+    {
+      "id": "bellingcat-octosuite",
+      "name": "Bellingcat Octosuite",
+      "category": "search",
+      "description": "Boite a outils open source pour analyser des comptes, depots et activites publiques GitHub.",
+      "type": "web",
+      "url": "https://github.com/bellingcat/octosuite"
+    },
+    {
+      "id": "bellingcat-sugartrail",
+      "name": "Bellingcat Sugartrail",
+      "category": "investigation",
+      "description": "Visualise les liens entre societes, dirigeants et adresses du registre britannique Companies House.",
+      "type": "web",
+      "url": "https://github.com/bellingcat/sugartrail"
+    },
+    {
+      "id": "bellingcat-council-search",
+      "name": "Bellingcat CouncilSearcher",
+      "category": "search",
+      "description": "Retrouve des citations exactes dans des reunions publiques au Royaume-Uni et en Irlande.",
+      "type": "web",
+      "url": "https://council-search.bellingcat.com/"
+    },
+    {
+      "id": "bellingcat-rs4osint",
+      "name": "Bellingcat RS4OSINT",
+      "category": "geoint",
+      "description": "Guide pratique de teledetection et d'imagerie satellite pour les investigations OSINT.",
+      "type": "web",
+      "url": "https://bellingcat.github.io/RS4OSINT/"
+    },
+    {
+      "id": "obsint-guidelines",
+      "name": "ObSINT Guidelines",
+      "category": "reference",
+      "description": "Recommandations europeennes pour mener des investigations OSINT d'interet public avec rigueur.",
+      "type": "web",
+      "url": "https://obsint.eu/"
+    },
+    {
       "id": "x-advanced-search",
       "name": "Recherche avancee X",
       "category": "socmint",
@@ -821,6 +933,54 @@
       "description": "Collection de scripts et petits outils OSINT preinstallee.",
       "type": "terminal",
       "command_hint": "ls /opt/osint/scripts-collection"
+    },
+    {
+      "id": "osintopia-community",
+      "name": "OSINTopia",
+      "category": "reference",
+      "description": "Communaute francophone pour progresser, partager des outils et participer a des projets OSINT.",
+      "type": "web",
+      "url": "https://osintopia.fr/"
+    },
+    {
+      "id": "osintopia-lexicon",
+      "name": "Lexique OSINTopia",
+      "category": "reference",
+      "description": "Lexique francophone des termes, methodes et disciplines de l'OSINT.",
+      "type": "web",
+      "url": "https://osintopia.fr/lexique/index.html"
+    },
+    {
+      "id": "osintopia-challenges",
+      "name": "Challenges OSINTopia",
+      "category": "reference",
+      "description": "Plateforme d'exercices pour pratiquer des investigations OSINT dans un cadre pedagogique.",
+      "type": "web",
+      "url": "https://challenges.osintopia.fr/"
+    },
+    {
+      "id": "opensanctions-search",
+      "name": "OpenSanctions",
+      "category": "investigation",
+      "description": "Recherche publique de personnes, entreprises, sanctions et personnes politiquement exposees.",
+      "type": "web",
+      "url": "https://www.opensanctions.org/search/"
+    },
+    {
+      "id": "opensanctions-yente",
+      "name": "Yente",
+      "category": "investigation",
+      "description": "Client en ligne de commande installe pour rechercher et rapprocher des entites avec une API Yente ou OpenSanctions.",
+      "type": "terminal",
+      "command_hint": "yente-cli search --help"
+    },
+    {
+      "id": "openaleph",
+      "name": "OpenAleph",
+      "category": "investigation",
+      "description": "Plateforme open source pour organiser des documents, rechercher des entites et explorer leurs relations.",
+      "type": "web",
+      "url": "https://openaleph.org/"
     }
   ]
 }
