@@ -1,0 +1,826 @@
+{
+  "categories": [
+    {
+      "id": "investigation",
+      "name": "Dossiers & graphes",
+      "description": "Gestion de cas, notes, correlations et visualisation de liens"
+    },
+    {
+      "id": "search",
+      "name": "Recherche publique",
+      "description": "Moteurs, archives et sources publiques passives"
+    },
+    {
+      "id": "image",
+      "name": "Images",
+      "description": "Recherche inversee, provenance et verification visuelle"
+    },
+    {
+      "id": "socmint",
+      "name": "SOCMINT",
+      "description": "Profils, contenus et recherches publiques sur les reseaux sociaux"
+    },
+    {
+      "id": "geoint",
+      "name": "GEOINT",
+      "description": "Cartes, vues terrain, ombres et indices geographiques"
+    },
+    {
+      "id": "verification",
+      "name": "Verification",
+      "description": "Compromissions connues, reputation et sources techniques publiques"
+    },
+    {
+      "id": "username",
+      "name": "Username",
+      "description": "Recherche de pseudonymes sur les reseaux sociaux"
+    },
+    {
+      "id": "email",
+      "name": "Email",
+      "description": "Footprinting et verification de comptes email"
+    },
+    {
+      "id": "google",
+      "name": "Google",
+      "description": "Investigation de comptes et services Google"
+    },
+    {
+      "id": "domain",
+      "name": "Domaine",
+      "description": "Enumeration de sous-domaines, emails et hotes"
+    },
+    {
+      "id": "phone",
+      "name": "Telephone",
+      "description": "Renseignements sur les numeros de telephone"
+    },
+    {
+      "id": "web",
+      "name": "Web",
+      "description": "Analyse de sites et applications web"
+    },
+    {
+      "id": "network",
+      "name": "Reseau",
+      "description": "Scan reseau, DNS et resolution"
+    },
+    {
+      "id": "breach",
+      "name": "Fuites & breach",
+      "description": "Recherche dans les bases de fuites connues"
+    },
+    {
+      "id": "secrets",
+      "name": "Secrets",
+      "description": "Detection de credentials et secrets dans le code"
+    },
+    {
+      "id": "archive",
+      "name": "Archives",
+      "description": "Historique web et archives publiques"
+    },
+    {
+      "id": "metadata",
+      "name": "Metadonnees",
+      "description": "Extraction EXIF et metadonnees de fichiers"
+    },
+    {
+      "id": "platform",
+      "name": "Plateformes web",
+      "description": "Interfaces graphiques integrees"
+    },
+    {
+      "id": "reference",
+      "name": "References",
+      "description": "Collections et documentation OSINT preinstallees"
+    }
+  ],
+  "tools": [
+    {
+      "id": "x-advanced-search",
+      "name": "Recherche avancee X",
+      "category": "socmint",
+      "description": "Recherche des publications publiques par compte, mots, dates et interactions.",
+      "type": "web",
+      "url": "https://x.com/search-advanced"
+    },
+    {
+      "id": "reddit-search",
+      "name": "Recherche Reddit",
+      "category": "socmint",
+      "description": "Recherche des publications, commentaires, communautes et comptes publics.",
+      "type": "web",
+      "url": "https://www.reddit.com/search/"
+    },
+    {
+      "id": "meta-content-library",
+      "name": "Meta Content Library",
+      "category": "socmint",
+      "description": "Acces de recherche aux contenus publics Facebook et Instagram pour les chercheurs eligibles.",
+      "type": "web",
+      "url": "https://transparency.meta.com/researchtools/meta-content-library/"
+    },
+    {
+      "id": "tgstat",
+      "name": "TGStat",
+      "category": "socmint",
+      "description": "Recherche et statistiques de chaines et publications Telegram publiques.",
+      "type": "web",
+      "url": "https://tgstat.com/"
+    },
+    {
+      "id": "whatsmyname-web",
+      "name": "WhatsMyName",
+      "category": "socmint",
+      "description": "Recherche un pseudonyme dans des profils publics de nombreuses plateformes.",
+      "type": "web",
+      "url": "https://whatsmyname.app/"
+    },
+    {
+      "id": "nasa-worldview",
+      "name": "NASA Worldview",
+      "category": "geoint",
+      "description": "Explore et compare l'imagerie satellite mondiale, y compris des observations recentes.",
+      "type": "web",
+      "url": "https://worldview.earthdata.nasa.gov/"
+    },
+    {
+      "id": "sentinel-eo-browser",
+      "name": "Sentinel Hub EO Browser",
+      "category": "geoint",
+      "description": "Compare des images satellite par zone, date, couverture nuageuse et collection.",
+      "type": "web",
+      "url": "https://apps.sentinel-hub.com/eo-browser/"
+    },
+    {
+      "id": "opentopography",
+      "name": "OpenTopography",
+      "category": "geoint",
+      "description": "Consulte des modeles d'elevation, reliefs et jeux de donnees topographiques ouverts.",
+      "type": "web",
+      "url": "https://portal.opentopography.org/"
+    },
+    {
+      "id": "adsb-exchange",
+      "name": "ADS-B Exchange",
+      "category": "geoint",
+      "description": "Visualise les positions diffusees publiquement par les aeronefs compatibles ADS-B.",
+      "type": "web",
+      "url": "https://globe.adsbexchange.com/"
+    },
+    {
+      "id": "marinetraffic",
+      "name": "MarineTraffic",
+      "category": "geoint",
+      "description": "Consulte les positions AIS publiques, ports et mouvements de navires disponibles.",
+      "type": "web",
+      "url": "https://www.marinetraffic.com/"
+    },
+    {
+      "id": "google-lens",
+      "name": "Google Lens",
+      "category": "image",
+      "description": "Recherche une image, un objet ou une version similaire sur le web.",
+      "type": "web",
+      "url": "https://lens.google.com/"
+    },
+    {
+      "id": "bing-visual-search",
+      "name": "Bing Visual Search",
+      "category": "image",
+      "description": "Compare une image complete ou une zone selectionnee avec l'index Bing.",
+      "type": "web",
+      "url": "https://www.bing.com/visualsearch"
+    },
+    {
+      "id": "yandex-images",
+      "name": "Yandex Images",
+      "category": "image",
+      "description": "Recherche visuelle et comparaison d'images similaires.",
+      "type": "web",
+      "url": "https://yandex.com/images/"
+    },
+    {
+      "id": "saucenao",
+      "name": "SauceNAO",
+      "category": "image",
+      "description": "Retrouve la source de dessins, illustrations et contenus visuels indexes.",
+      "type": "web",
+      "url": "https://saucenao.com/"
+    },
+    {
+      "id": "openstreetmap",
+      "name": "OpenStreetMap",
+      "category": "geoint",
+      "description": "Carte mondiale collaborative pour comparer routes, lieux et points d'interet.",
+      "type": "web",
+      "url": "https://www.openstreetmap.org/"
+    },
+    {
+      "id": "google-earth",
+      "name": "Google Earth",
+      "category": "geoint",
+      "description": "Explore l'imagerie satellite, le relief et les reperes geographiques.",
+      "type": "web",
+      "url": "https://earth.google.com/web/"
+    },
+    {
+      "id": "mapillary",
+      "name": "Mapillary",
+      "category": "geoint",
+      "description": "Consulte des images de rue contributives et datees sur une carte.",
+      "type": "web",
+      "url": "https://www.mapillary.com/app/"
+    },
+    {
+      "id": "suncalc",
+      "name": "SunCalc",
+      "category": "geoint",
+      "description": "Compare la position du soleil et les ombres selon le lieu, la date et l'heure.",
+      "type": "web",
+      "url": "https://www.suncalc.org/"
+    },
+    {
+      "id": "geohints",
+      "name": "GeoHints",
+      "category": "geoint",
+      "description": "Reference visuelle pour bornes, panneaux, routes, plaques et indices regionaux.",
+      "type": "web",
+      "url": "https://geohints.com/"
+    },
+    {
+      "id": "haveibeenpwned",
+      "name": "Have I Been Pwned",
+      "category": "verification",
+      "description": "Verifie si une adresse email apparait dans une compromission publique connue.",
+      "type": "web",
+      "url": "https://haveibeenpwned.com/"
+    },
+    {
+      "id": "mozilla-monitor",
+      "name": "Mozilla Monitor",
+      "category": "verification",
+      "description": "Surveille les compromissions connues et fournit des conseils de protection.",
+      "type": "web",
+      "url": "https://monitor.mozilla.org/"
+    },
+    {
+      "id": "urlscan",
+      "name": "urlscan.io",
+      "category": "verification",
+      "description": "Consulte les analyses publiques, requetes et captures associees a une URL.",
+      "type": "web",
+      "url": "https://urlscan.io/"
+    },
+    {
+      "id": "virustotal",
+      "name": "VirusTotal",
+      "category": "verification",
+      "description": "Verifie la reputation publique d'une URL, d'un domaine, d'une IP ou d'un hash.",
+      "type": "web",
+      "url": "https://www.virustotal.com/gui/home/search"
+    },
+    {
+      "id": "abuseipdb",
+      "name": "AbuseIPDB",
+      "category": "verification",
+      "description": "Consulte les signalements publics et la reputation d'une adresse IP.",
+      "type": "web",
+      "url": "https://www.abuseipdb.com/"
+    },
+    {
+      "id": "duckduckgo",
+      "name": "DuckDuckGo",
+      "category": "search",
+      "description": "Recherche web publique avec operateurs site, filetype, intitle et inurl.",
+      "type": "web",
+      "url": "https://duckduckgo.com/"
+    },
+    {
+      "id": "wayback-machine",
+      "name": "Wayback Machine",
+      "category": "search",
+      "description": "Consulte les versions archivees publiquement d'un site ou d'une page.",
+      "type": "web",
+      "url": "https://web.archive.org/"
+    },
+    {
+      "id": "crtsh",
+      "name": "crt.sh",
+      "category": "search",
+      "description": "Recherche passive de certificats publics et de sous-domaines associes.",
+      "type": "web",
+      "url": "https://crt.sh/"
+    },
+    {
+      "id": "tineye",
+      "name": "TinEye",
+      "category": "search",
+      "description": "Recherche inversee d'images dans des sources publiques.",
+      "type": "web",
+      "url": "https://tineye.com/"
+    },
+    {
+      "id": "tor-check",
+      "name": "Verifier Tor",
+      "category": "search",
+      "description": "Verifie explicitement la sortie Tor du laboratoire sans modifier le reseau global.",
+      "type": "terminal",
+      "command_hint": "curl --proxy socks5h://tor:9050 https://check.torproject.org/api/ip"
+    },
+    {
+      "id": "seekr",
+      "name": "Seekr",
+      "category": "investigation",
+      "description": "Dossiers OSINT, fiches cibles, notes et integration d'outils (alternative Maltego light).",
+      "type": "web",
+      "url": "/seekr/web/"
+    },
+    {
+      "id": "spiderfoot",
+      "name": "SpiderFoot",
+      "category": "investigation",
+      "description": "Automatisation OSINT, correlation de 200+ modules et graphe de relations entre entites.",
+      "type": "web",
+      "url": "/spiderfoot/"
+    },
+    {
+      "id": "recon-ng",
+      "name": "Recon-ng",
+      "category": "investigation",
+      "description": "Framework modulaire avec workspaces. Lancez recon-ng dans le terminal web.",
+      "type": "terminal",
+      "command_hint": "recon-ng"
+    },
+    {
+      "id": "sherlock",
+      "name": "Sherlock",
+      "category": "username",
+      "description": "Recherche un username sur 400+ plateformes sociales.",
+      "type": "cli",
+      "command": [
+        "sherlock",
+        "{target}",
+        "--print-found",
+        "--no-color"
+      ],
+      "placeholder": "username",
+      "timeout": 300
+    },
+    {
+      "id": "maigret",
+      "name": "Maigret",
+      "category": "username",
+      "description": "Dossier complet sur une personne via son username (3000+ sites).",
+      "type": "cli",
+      "command": [
+        "maigret",
+        "{target}",
+        "--no-color"
+      ],
+      "placeholder": "username",
+      "timeout": 600
+    },
+    {
+      "id": "blackbird",
+      "name": "Blackbird",
+      "category": "username",
+      "description": "Username ou email sur 600+ sites (WhatsMyName), export et profil IA optionnel.",
+      "type": "cli",
+      "command": [
+        "python3",
+        "/opt/blackbird/blackbird.py",
+        "--username",
+        "{target}"
+      ],
+      "placeholder": "username",
+      "timeout": 600,
+      "workdir": "/opt/blackbird"
+    },
+    {
+      "id": "social-analyzer-cli",
+      "name": "Social Analyzer (CLI)",
+      "category": "username",
+      "description": "Analyse de profils sur 1000+ sites sociaux avec metadonnees.",
+      "type": "cli",
+      "command": [
+        "python3",
+        "-m",
+        "social-analyzer",
+        "--username",
+        "{target}",
+        "--metadata",
+        "--top",
+        "100"
+      ],
+      "placeholder": "username",
+      "timeout": 600
+    },
+    {
+      "id": "socialscan",
+      "name": "Socialscan",
+      "category": "username",
+      "description": "Verification precise de disponibilite sur les plateformes majeures.",
+      "type": "cli",
+      "command": [
+        "socialscan",
+        "{target}"
+      ],
+      "placeholder": "username",
+      "timeout": 120
+    },
+    {
+      "id": "snscrape",
+      "name": "snscrape (Twitter/X)",
+      "category": "username",
+      "description": "Alternative a twint pour scraper des profils Twitter/X publics (sans API officielle).",
+      "type": "cli",
+      "command": [
+        "snscrape",
+        "--jsonl",
+        "twitter-user",
+        "{target}"
+      ],
+      "placeholder": "username",
+      "timeout": 180
+    },
+    {
+      "id": "holehe",
+      "name": "Holehe",
+      "category": "email",
+      "description": "Detecte les comptes lies a une adresse email.",
+      "type": "cli",
+      "command": [
+        "holehe",
+        "{target}",
+        "--only-used"
+      ],
+      "placeholder": "email@example.com",
+      "timeout": 180
+    },
+    {
+      "id": "h8mail",
+      "name": "h8mail",
+      "category": "breach",
+      "description": "Chasse aux fuites de mots de passe et footprinting email.",
+      "type": "cli",
+      "command": [
+        "h8mail",
+        "-t",
+        "{target}"
+      ],
+      "placeholder": "email@example.com",
+      "timeout": 180
+    },
+    {
+      "id": "blackbird-email",
+      "name": "Blackbird (email)",
+      "category": "email",
+      "description": "Recherche d'un email sur 600+ plateformes.",
+      "type": "cli",
+      "command": [
+        "python3",
+        "/opt/blackbird/blackbird.py",
+        "--email",
+        "{target}"
+      ],
+      "placeholder": "email@example.com",
+      "timeout": 600,
+      "workdir": "/opt/blackbird"
+    },
+    {
+      "id": "maigret-email",
+      "name": "Emails depuis un username",
+      "category": "email",
+      "type": "cli",
+      "description": "Decouvre les emails et identifiants exposes sur les profils lies a un pseudo, via Maigret.",
+      "placeholder": "username",
+      "command": [
+        "maigret",
+        "{target}",
+        "--no-color"
+      ]
+    },
+    {
+      "id": "ghunt-email",
+      "name": "GHunt (email)",
+      "category": "google",
+      "description": "Investigation Google: infos liees a une adresse Gmail (auth requise, voir README).",
+      "type": "cli",
+      "command": [
+        "ghunt",
+        "email",
+        "{target}"
+      ],
+      "placeholder": "email@gmail.com",
+      "timeout": 180,
+      "requires_auth": true,
+      "auth_file": "/root/.config/ghunt/creds.m"
+    },
+    {
+      "id": "ghunt-gaia",
+      "name": "GHunt (Gaia ID)",
+      "category": "google",
+      "description": "Investigation Google via un Gaia ID numerique.",
+      "type": "cli",
+      "command": [
+        "ghunt",
+        "gaia",
+        "{target}"
+      ],
+      "placeholder": "123456789012345678901",
+      "timeout": 180,
+      "requires_auth": true,
+      "auth_file": "/root/.config/ghunt/creds.m"
+    },
+    {
+      "id": "harvester",
+      "name": "theHarvester",
+      "category": "domain",
+      "description": "Collecte emails, sous-domaines et hotes d'un DOMAINE depuis des sources publiques (sans cle API).",
+      "type": "cli",
+      "command": [
+        "theHarvester",
+        "-d",
+        "{target}",
+        "-b",
+        "crtsh,rapiddns,hackertarget,anubis,otx,threatminer,certspotter,urlscan"
+      ],
+      "placeholder": "example.com",
+      "timeout": 300
+    },
+    {
+      "id": "subfinder",
+      "name": "Subfinder",
+      "category": "domain",
+      "description": "Decouverte passive de sous-domaines via 50+ sources.",
+      "type": "cli",
+      "command": [
+        "subfinder",
+        "-d",
+        "{target}",
+        "-silent"
+      ],
+      "placeholder": "example.com",
+      "timeout": 300
+    },
+    {
+      "id": "amass",
+      "name": "Amass",
+      "category": "domain",
+      "description": "Cartographie de la surface d'attaque et enumeration de sous-domaines.",
+      "type": "cli",
+      "command": [
+        "amass",
+        "enum",
+        "-passive",
+        "-d",
+        "{target}"
+      ],
+      "placeholder": "example.com",
+      "timeout": 600
+    },
+    {
+      "id": "dnsx",
+      "name": "dnsx",
+      "category": "domain",
+      "description": "Toolkit DNS rapide: resolution, records, bruteforce.",
+      "type": "cli",
+      "command": [
+        "dnsx",
+        "-d",
+        "{target}",
+        "-silent",
+        "-a",
+        "-aaaa",
+        "-cname",
+        "-mx",
+        "-ns",
+        "-txt"
+      ],
+      "placeholder": "example.com",
+      "timeout": 120
+    },
+    {
+      "id": "gau",
+      "name": "gau (GetAllUrls)",
+      "category": "domain",
+      "description": "Recupere les URLs connues d'un domaine depuis les archives publiques.",
+      "type": "cli",
+      "command": [
+        "gau",
+        "{target}"
+      ],
+      "placeholder": "example.com",
+      "timeout": 180
+    },
+    {
+      "id": "phoneinfoga",
+      "name": "PhoneInfoga",
+      "category": "phone",
+      "description": "Framework de renseignement sur les numeros de telephone.",
+      "type": "cli",
+      "command": [
+        "phoneinfoga",
+        "scan",
+        "-n",
+        "{target}"
+      ],
+      "placeholder": "+33612345678",
+      "timeout": 120
+    },
+    {
+      "id": "ghosttrack",
+      "name": "GhostTrack",
+      "category": "phone",
+      "description": "Outil interactif IP, telephone et username. Lancez: cd /opt/GhostTrack && python3 GhostTR.py",
+      "type": "terminal",
+      "command_hint": "cd /opt/GhostTrack && python3 GhostTR.py"
+    },
+    {
+      "id": "httpx",
+      "name": "httpx",
+      "category": "web",
+      "description": "Sonde HTTP rapide: status, titre, technologies.",
+      "type": "cli",
+      "command": [
+        "httpx",
+        "-u",
+        "{target}",
+        "-silent",
+        "-title",
+        "-status-code",
+        "-tech-detect"
+      ],
+      "placeholder": "https://example.com",
+      "timeout": 60
+    },
+    {
+      "id": "whatweb",
+      "name": "WhatWeb",
+      "category": "web",
+      "description": "Identification des technologies utilisees par un site web.",
+      "type": "cli",
+      "command": [
+        "whatweb",
+        "{target}",
+        "--color=never"
+      ],
+      "placeholder": "https://example.com",
+      "timeout": 120
+    },
+    {
+      "id": "katana",
+      "name": "Katana",
+      "category": "web",
+      "description": "Crawler web rapide pour decouvrir URLs, endpoints et assets.",
+      "type": "cli",
+      "command": [
+        "katana",
+        "-u",
+        "{target}",
+        "-silent",
+        "-d",
+        "2"
+      ],
+      "placeholder": "https://example.com",
+      "timeout": 300
+    },
+    {
+      "id": "nuclei",
+      "name": "Nuclei",
+      "category": "web",
+      "description": "Scan de vulnerabilites et misconfigurations via templates.",
+      "type": "cli",
+      "command": [
+        "nuclei",
+        "-u",
+        "{target}",
+        "-silent"
+      ],
+      "placeholder": "https://example.com",
+      "timeout": 300
+    },
+    {
+      "id": "nmap",
+      "name": "Nmap",
+      "category": "network",
+      "description": "Scan de ports et detection de services (usage responsable uniquement).",
+      "type": "cli",
+      "command": [
+        "nmap",
+        "-sV",
+        "-T4",
+        "{target}"
+      ],
+      "placeholder": "example.com",
+      "timeout": 300
+    },
+    {
+      "id": "dig",
+      "name": "DIG",
+      "category": "network",
+      "description": "Interrogation DNS (enregistrements A, MX, TXT, NS).",
+      "type": "cli",
+      "command": [
+        "bash",
+        "-lc",
+        "for t in A AAAA MX NS TXT SOA; do dig +noall +answer \"$1\" $t; done",
+        "_",
+        "{target}"
+      ],
+      "placeholder": "example.com",
+      "timeout": 30
+    },
+    {
+      "id": "whois",
+      "name": "WHOIS",
+      "category": "network",
+      "description": "Informations d'enregistrement de domaine.",
+      "type": "cli",
+      "command": [
+        "whois",
+        "{target}"
+      ],
+      "placeholder": "example.com",
+      "timeout": 30
+    },
+    {
+      "id": "trufflehog",
+      "name": "TruffleHog",
+      "category": "secrets",
+      "description": "Scan de secrets dans un depot Git public.",
+      "type": "cli",
+      "command": [
+        "trufflehog",
+        "git",
+        "{target}",
+        "--no-update"
+      ],
+      "placeholder": "https://github.com/org/repo",
+      "timeout": 600
+    },
+    {
+      "id": "exiftool",
+      "name": "ExifTool",
+      "category": "metadata",
+      "description": "Extraction de metadonnees EXIF (chemin dans /data).",
+      "type": "cli",
+      "command": [
+        "exiftool",
+        "{target}"
+      ],
+      "placeholder": "uploads/photo.jpg",
+      "timeout": 30
+    },
+    {
+      "id": "filebrowser",
+      "name": "Filebrowser",
+      "category": "platform",
+      "description": "Gestionnaire de fichiers partage entre tous vos projets.",
+      "type": "web",
+      "url": "/files/"
+    },
+    {
+      "id": "terminal",
+      "name": "Terminal integre",
+      "category": "platform",
+      "description": "Shell bash complet dans le dashboard via xterm.js.",
+      "type": "web",
+      "url": "/terminal/"
+    },
+    {
+      "id": "social-analyzer-web",
+      "name": "Social Analyzer (Web)",
+      "category": "platform",
+      "description": "Interface web pour analyser un username sur 1000+ sites.",
+      "type": "web",
+      "url": "/social-analyzer/"
+    },
+    {
+      "id": "webcheck",
+      "name": "Web-Check",
+      "category": "platform",
+      "description": "Analyse all-in-one d'un site (SSL, DNS, headers, trackers, perf).",
+      "type": "web",
+      "url": "port:8090"
+    },
+    {
+      "id": "awesome-osint",
+      "name": "awesome-osint",
+      "category": "reference",
+      "description": "Liste curatee de 2000+ ressources OSINT (fichier local).",
+      "type": "terminal",
+      "command_hint": "less /opt/osint/awesome-osint/README.md"
+    },
+    {
+      "id": "osint-scripts",
+      "name": "osint_stuff_tool_collection",
+      "category": "reference",
+      "description": "Collection de scripts et petits outils OSINT preinstallee.",
+      "type": "terminal",
+      "command_hint": "ls /opt/osint/scripts-collection"
+    }
+  ]
+}

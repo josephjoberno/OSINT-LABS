@@ -1,0 +1,9 @@
+# Build artifacts
+node_modules/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+
+# Data volume local (dev)
+data/

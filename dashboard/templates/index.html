@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSINT Labs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <section class="project-gate" id="project-gate">
+    <div class="project-gate-card">
+      <div class="brand brand-large">
+        <span class="brand-mark">OL</span>
+        <div>
+          <h1>OSINT Labs</h1>
+          <p>Creez ou ouvrez un projet pour commencer</p>
+        </div>
+      </div>
+
+      <form id="create-project-form" class="project-form">
+        <label for="project-name">Nom du projet</label>
+        <input type="text" id="project-name" name="name" required maxlength="120" placeholder="Ex: Investigation ACME" autocomplete="off">
+        <label for="project-description">Description</label>
+        <textarea id="project-description" name="description" rows="3" maxlength="2000" placeholder="Objectif, contexte, cibles principales..."></textarea>
+        <label for="project-primary-target">Cible principale (optionnel)</label>
+        <input type="text" id="project-primary-target" name="primary_target" maxlength="512" placeholder="Ex: josephjober, email@domaine.com" autocomplete="off">
+        <p class="muted form-hint">Partagee entre tous les outils du projet (autocompletion, suggestions).</p>
+        <button type="submit" class="btn btn-primary btn-block">Creer et ouvrir</button>
+      </form>
+
+      <div class="project-list-wrap">
+        <h2>Projets existants</h2>
+        <ul id="project-list" class="project-list"></ul>
+        <p class="muted" id="project-list-empty">Aucun projet pour le moment.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="layout hidden" id="workspace">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">OL</span>
+        <div>
+          <h1>OSINT Labs</h1>
+          <p id="sidebar-project-name">Projet</p>
+        </div>
+      </div>
+
+      <div class="project-meta" id="project-meta"></div>
+
+      <section class="investigation-panel" id="investigation-panel">
+        <div class="investigation-head">
+          <h2>Investigation</h2>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-refresh-context" title="Actualiser">Actualiser</button>
+        </div>
+        <label for="ctx-subject">Sujet</label>
+        <input type="text" id="ctx-subject" maxlength="120" placeholder="Personne ou dossier" autocomplete="off">
+        <label for="ctx-primary">Cible principale</label>
+        <input type="text" id="ctx-primary" maxlength="512" placeholder="Username, email, domaine..." autocomplete="off">
+        <button type="button" class="btn btn-secondary btn-sm btn-block" id="btn-save-context">Enregistrer le contexte</button>
+        <div class="entity-graph-section">
+          <div class="investigation-entities-head">
+            <span>Liens</span>
+            <span class="graph-head-right">
+              <span class="entity-count" id="link-count">0</span>
+              <button type="button" class="btn btn-ghost btn-xs" id="graph-expand" title="Agrandir le graphe">Agrandir</button>
+            </span>
+          </div>
+          <div id="entity-graph" class="entity-graph" aria-label="Graphe des entites"></div>
+          <p class="muted graph-hint">Cliquez sur un noeud pour lancer l'outil adapte.</p>
+        </div>
+        <div class="investigation-entities">
+          <div class="investigation-entities-head">
+            <span>Entites decouvertes</span>
+            <span class="entity-count" id="entity-count">0</span>
+          </div>
+          <ul id="entity-list" class="entity-list"></ul>
+          <form id="add-entity-form" class="add-entity-form">
+            <input type="text" id="add-entity-value" placeholder="Ajouter une entite..." maxlength="512" autocomplete="off">
+            <button type="submit" class="btn btn-ghost btn-sm">+</button>
+          </form>
+        </div>
+      </section>
+
+      <nav class="categories" id="category-nav">
+        {% for cat in categories %}
+        <button class="cat-btn" data-category="{{ cat.id }}">{{ cat.name }}</button>
+        {% endfor %}
+        <button class="cat-btn active" data-category="all">Tous</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button type="button" class="btn btn-secondary" id="open-xterm">Terminal integre</button>
+        <button type="button" class="btn btn-ghost btn-block" id="open-board">Tableau d'annotations</button>
+        <button type="button" class="btn btn-ghost btn-block" id="open-files">Fichiers (Filebrowser)</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="work-col">
+        <header class="main-header">
+          <div>
+            <h2 id="section-title">Espace de travail</h2>
+            <p id="section-desc">Outils OSINT pour le projet actif.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-ghost" id="btn-update">Mettre a jour</button>
+            <button class="btn btn-ghost" id="btn-reset">Reinitialiser</button>
+            <button class="btn btn-ghost" id="toggle-history">Historique</button>
+            <button class="btn btn-ghost" id="btn-leave-project">Projets</button>
+          </div>
+        </header>
+
+        <section class="panel run-panel hidden" id="run-panel">
+          <div class="panel-header">
+            <div>
+              <h3 id="run-tool-name">Outil</h3>
+              <p id="run-tool-desc"></p>
+            </div>
+            <div class="panel-actions">
+              <button type="button" class="btn btn-ghost hidden" id="run-help-btn">Aide</button>
+              <button class="btn btn-ghost" id="close-panel">Fermer</button>
+            </div>
+          </div>
+
+          <form id="run-form" class="run-form">
+            <label for="run-target">Cible</label>
+            <div class="run-input-row">
+              <input type="text" id="run-target" name="target" required autocomplete="off" list="target-suggestions">
+              <datalist id="target-suggestions"></datalist>
+              <button type="submit" class="btn btn-primary" id="run-submit">Executer</button>
+              <button type="button" class="btn btn-danger hidden" id="run-stop">Arreter</button>
+            </div>
+          </form>
+          <p class="muted run-hint">La commande s'execute dans le terminal integre a droite.</p>
+
+          <div class="terminal-output hidden" id="terminal-output">
+            <div class="terminal-line muted">Pret.</div>
+          </div>
+        </section>
+
+        <div class="tools-toolbar">
+          <div class="tools-search">
+            <input type="search" id="tool-search" placeholder="Rechercher un outil (nom, description, categorie)..." autocomplete="off">
+          </div>
+        </div>
+
+        <div class="tools-groups" id="tools-grid">
+          {% for cat in categories %}
+          {% set cat_tools = tools | selectattr('category', 'equalto', cat.id) | list %}
+          {% if cat_tools %}
+          <section class="tool-group" data-group="{{ cat.id }}">
+            <div class="tool-group-head">
+              <h3 class="tool-group-title">{{ cat.name }}</h3>
+              <span class="tool-group-count">{{ cat_tools | length }}</span>
+            </div>
+            <div class="tools-grid">
+              {% for tool in cat_tools %}
+              <article
+                class="tool-card{% if tool.locked %} tool-card-locked{% endif %}"
+            data-category="{{ tool.category }}"
+            data-type="{{ tool.type }}"
+            data-tool-id="{{ tool.id }}"
+            data-tool-name="{{ tool.name }}"
+            data-placeholder="{{ tool.get('placeholder', '') }}"
+            data-url="{{ tool.get('url', '') }}"
+            data-command-hint="{{ tool.get('command_hint', '') }}"
+            data-locked="{{ '1' if tool.locked else '' }}"
+          >
+            <div class="tool-card-head">
+              <span class="tool-type">{{ 'Web' if tool.type == 'web' else ('Terminal' if tool.type == 'terminal' else 'CLI') }}</span>
+              <h3>{{ tool.name }}</h3>
+            </div>
+            <p>{{ tool.description }}</p>
+            {% if tool.locked %}<p class="tool-locked-note">Configuration requise. Voir Aide.</p>{% endif %}
+            <div class="tool-card-actions">
+              <button type="button" class="btn btn-ghost help-btn" data-help-id="{{ tool.id }}">Aide</button>
+              <button type="button" class="btn btn-primary launch-btn">
+                {% if tool.locked %}Configurer{% elif tool.type == 'web' %}Ouvrir{% elif tool.type == 'terminal' %}Terminal{% else %}Lancer{% endif %}
+              </button>
+            </div>
+              </article>
+              {% endfor %}
+            </div>
+          </section>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <section class="panel xterm-panel hidden" id="xterm-panel">
+        <div class="panel-header">
+          <div>
+            <h3>Terminal integre</h3>
+            <p>Shell bash complet via xterm.js.</p>
+          </div>
+          <div class="panel-actions">
+            <button class="btn btn-ghost" id="xterm-reconnect">Reconnecter</button>
+            <button class="btn btn-ghost" id="close-xterm">Fermer</button>
+          </div>
+        </div>
+        <div id="xterm-container" class="xterm-host" tabindex="0"></div>
+      </section>
+
+      <aside class="history-panel hidden" id="history-panel">
+        <div class="panel-header">
+          <h3>Historique du projet</h3>
+          <button class="btn btn-ghost" id="clear-history">Effacer</button>
+        </div>
+        <ul id="history-list" class="history-list"></ul>
+      </aside>
+    </main>
+  </div>
+
+  <div class="help-modal hidden" id="help-modal" role="dialog" aria-modal="true">
+    <div class="help-modal-backdrop" id="help-backdrop"></div>
+    <div class="help-modal-content">
+      <div class="help-modal-header">
+        <div>
+          <h3 id="help-title">Aide</h3>
+          <p id="help-summary" class="help-summary"></p>
+        </div>
+        <button type="button" class="btn btn-ghost" id="close-help">Fermer</button>
+      </div>
+      <div class="help-modal-body" id="help-body"></div>
+    </div>
+  </div>
+
+  <div class="help-modal hidden" id="system-modal" role="dialog" aria-modal="true">
+    <div class="help-modal-backdrop" id="system-backdrop"></div>
+    <div class="help-modal-content system-modal-content">
+      <div class="help-modal-header">
+        <div>
+          <h3 id="system-modal-title">Operation systeme</h3>
+          <p id="system-modal-desc" class="help-summary"></p>
+        </div>
+        <button type="button" class="btn btn-ghost" id="close-system-modal">Fermer</button>
+      </div>
+      <div id="reset-form-wrap" class="hidden">
+        <label for="reset-confirm">Tapez RESET pour confirmer</label>
+        <input type="text" id="reset-confirm" autocomplete="off" placeholder="RESET">
+        <div class="reset-scope">
+          <label><input type="radio" name="reset-scope" value="project" checked> Projet actif uniquement</label>
+          <label><input type="radio" name="reset-scope" value="all"> Tous les projets</label>
+        </div>
+        <button type="button" class="btn btn-danger" id="confirm-reset">Reinitialiser</button>
+      </div>
+      <div class="terminal-output system-output" id="system-output"></div>
+    </div>
+  </div>
+
+  <div class="help-modal hidden" id="graph-modal" role="dialog" aria-modal="true">
+    <div class="help-modal-backdrop" id="graph-backdrop"></div>
+    <div class="help-modal-content graph-modal-content">
+      <div class="help-modal-header">
+        <div>
+          <h3>Graphe des liens</h3>
+          <p class="help-summary">Cliquez sur un noeud pour lancer l'outil adapte.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" id="close-graph">Fermer</button>
+      </div>
+      <div class="graph-modal-body">
+        <div id="entity-graph-large" class="entity-graph entity-graph-large" aria-label="Graphe des entites agrandi"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="help-modal hidden" id="board-modal" role="dialog" aria-modal="true">
+    <div class="help-modal-backdrop" id="board-backdrop"></div>
+    <div class="help-modal-content board-modal-content">
+      <div class="help-modal-header">
+        <div>
+          <h3>Canvas d'investigation</h3>
+          <p class="help-summary">Les elements trouves sont classes automatiquement. Vous pouvez les deplacer, les masquer et ajouter vos notes.</p>
+        </div>
+        <div class="panel-actions">
+          <button type="button" class="btn btn-primary btn-sm" id="board-add">Ajouter une note</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="board-fit">Centrer</button>
+          <button type="button" class="btn btn-ghost" id="close-board">Fermer</button>
+        </div>
+      </div>
+      <div class="investigation-workspace">
+        <div class="board-stage">
+          <div class="board-toolbar" aria-label="Commandes du canvas">
+            <div class="board-drawing-tools" role="toolbar" aria-label="Outils de dessin">
+              <button type="button" class="btn btn-ghost btn-sm is-active" data-board-tool="select">Selection</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-board-tool="pencil">Crayon</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-board-tool="rectangle">Rectangle</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-board-tool="arrow">Fleche</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-board-tool="text">Texte</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-board-tool="eraser">Gomme</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="board-undo" title="Annuler" disabled>Annuler</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="board-redo" title="Retablir" disabled>Retablir</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="board-delete-drawing" disabled>Supprimer</button>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" id="board-zoom-out" aria-label="Reduire">−</button>
+            <span id="board-zoom-label">100 %</span>
+            <button type="button" class="btn btn-ghost btn-sm" id="board-zoom-in" aria-label="Agrandir">+</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="board-show-hidden">Afficher les elements masques</button>
+          </div>
+          <div class="board-canvas" id="board-canvas">
+            <div class="board-world" id="board-world">
+              <svg class="board-links" id="board-links" aria-hidden="true"></svg>
+              <div id="board-groups"></div>
+              <div id="board-nodes"></div>
+              <svg class="board-drawings" id="board-drawings" aria-label="Calque de dessin"></svg>
+            </div>
+          </div>
+        </div>
+        <aside class="assistant-panel">
+          <div class="assistant-head">
+            <h3>Assistant du projet</h3>
+            <button type="button" class="btn btn-ghost btn-sm" id="chat-settings-toggle">Reglages</button>
+          </div>
+          <form class="chat-settings hidden" id="chat-settings-form">
+            <label for="chat-api-key">Cle OpenRouter</label>
+            <input id="chat-api-key" type="password" autocomplete="off" placeholder="sk-or-v1-...">
+            <label for="chat-model">Modele</label>
+            <input id="chat-model" type="text" value="openai/gpt-4.1-mini" autocomplete="off">
+            <label class="chat-check"><input id="chat-web" type="checkbox"> Autoriser la recherche web</label>
+            <button class="btn btn-secondary btn-sm" type="submit">Enregistrer</button>
+          </form>
+          <div class="chat-messages" id="chat-messages">
+            <p class="muted">Posez une question sur les elements du projet.</p>
+          </div>
+          <form class="chat-compose" id="chat-form">
+            <textarea id="chat-input" rows="3" maxlength="6000" placeholder="Votre question" required></textarea>
+            <button class="btn btn-primary" type="submit">Envoyer</button>
+          </form>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.TOOLS_HELP = {{ tools_help | safe }};
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+  <script src="/static/js/terminal.js"></script>
+  <script src="/static/js/entity-graph.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

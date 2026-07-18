@@ -1,0 +1,106 @@
+services:
+  osint-labs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: osint-labs:latest
+    container_name: osint-labs
+    ports:
+      - "${OSINT_BIND_ADDRESS:-127.0.0.1}:8080:8080"
+    volumes:
+      - osint-data:/data
+    restart: unless-stopped
+    environment:
+      - OSINT_DATA_DIR=/data
+      - OSINT_TOOL_TIMEOUT=600
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-change-me-in-production}
+      - FILEBROWSER_DEFAULT_USER=${FILEBROWSER_DEFAULT_USER:-admin}
+      - FILEBROWSER_DEFAULT_PASSWORD=${FILEBROWSER_DEFAULT_PASSWORD:-admin}
+      - OSINT_TOR_PROXY=socks5h://tor:9050
+    depends_on:
+      seekr:
+        condition: service_started
+      webcheck:
+        condition: service_started
+      filebrowser:
+        condition: service_started
+      tor:
+        condition: service_healthy
+    networks:
+      - osint-net
+
+  tor:
+    image: dockage/tor-privoxy:latest
+    container_name: osint-tor
+    expose:
+      - "9050"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 9050"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - osint-net
+
+  filebrowser:
+    image: filebrowser/filebrowser:v2.32.0
+    container_name: osint-filebrowser
+    expose:
+      - "8081"
+    volumes:
+      - osint-data:/srv
+      - filebrowser-db:/database
+    command:
+      - --root=/srv/projects
+      - --database=/database/filebrowser.db
+      - --address=0.0.0.0
+      - --port=8081
+      - --baseurl=/files
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8081/files/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - osint-net
+
+  seekr:
+    image: ghcr.io/seekr-osint/seekr:latest
+    container_name: osint-seekr
+    expose:
+      - "8569"
+    volumes:
+      - seekr-data:/root/.seekr
+    restart: unless-stopped
+    networks:
+      - osint-net
+
+  webcheck:
+    image: lissy93/web-check:latest
+    container_name: osint-webcheck
+    # Web-Check (SvelteKit) uses absolute /_app and /api paths that collide
+    # with the dashboard when reverse-proxied under a subpath, so it is served
+    # directly on its own host port instead.
+    ports:
+      - "8090:3000"
+    expose:
+      - "3000"
+    restart: unless-stopped
+    networks:
+      - osint-net
+
+networks:
+  osint-net:
+    driver: bridge
+
+volumes:
+  osint-data:
+    driver: local
+  seekr-data:
+    driver: local
+  filebrowser-db:
+    driver: local

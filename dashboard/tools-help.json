@@ -1,0 +1,449 @@
+{
+  "seekr": {
+    "summary": "Gestion de dossiers OSINT avec fiches cibles et notes.",
+    "what": "Seekr centralise vos investigations : cibles, comptes decouverts, notes et outils integres. Alternative legere a un CRM OSINT ou a Maltego pour le suivi de cas.",
+    "usage": "Cliquez Ouvrir pour acceder a l'interface web. Creez une fiche cible, renseignez username, email ou domaine, puis enrichissez avec les modules disponibles.",
+    "example": "Nouvelle cible: username jdupont, puis lancer la decouverte de comptes depuis la fiche.",
+    "target": "Personne, username, email, domaine ou organisation.",
+    "tips": [
+      "Les donnees Seekr sont persistees dans le volume Docker seekr-data.",
+      "Combinez avec SpiderFoot pour la correlation automatique."
+    ],
+    "github": "https://github.com/seekr-osint/seekr"
+  },
+  "spiderfoot": {
+    "summary": "Moteur OSINT automatise avec graphe de relations.",
+    "what": "SpiderFoot lance plus de 200 modules (DNS, WHOIS, leaks, reseaux sociaux, etc.) et relie les resultats entre entites. Ideal pour cartographier une surface d'attaque ou visualiser des liens.",
+    "usage": "Ouvrir l'interface web, creer un nouveau scan, definir la cible (domaine, IP, email, etc.) et selectionner les modules. Consultez l'onglet Graph pour les relations.",
+    "example": "Scan sur example.com avec modules passive et correlation.",
+    "target": "Domaine, IP, email, nom, numero de telephone, bitcoin address, etc.",
+    "tips": [
+      "Demarrage lent au premier lancement (nombreux modules).",
+      "Exportez les resultats en CSV ou JSON depuis l'interface."
+    ],
+    "github": "https://github.com/smicallef/spiderfoot"
+  },
+  "recon-ng": {
+    "summary": "Framework modulaire de reconnaissance avec workspaces.",
+    "what": "Recon-ng structure les investigations en workspaces SQLite. Chaque module enrichit la base (contacts, hotes, credentials). Standard en pentest et OSINT professionnel.",
+    "usage": "Ouvrez le terminal integre et lancez recon-ng. Commandes de base: workspaces create nom, workspaces load nom, modules search motcle, modules load module, options set SOURCE cible, run.",
+    "example": "recon-ng\n[recon-ng][default] > workspaces create cas1\n[recon-ng][cas1] > modules load recon/domains-hosts/hackertarget",
+    "target": "Domaine, email ou entite selon le module charge.",
+    "tips": [
+      "Tapez help dans recon-ng pour la liste des commandes.",
+      "show modules affiche les modules disponibles."
+    ],
+    "github": "https://github.com/lanmaster53/recon-ng"
+  },
+  "sherlock": {
+    "summary": "Recherche de username sur 400+ sites.",
+    "what": "Sherlock verifie si un pseudonyme existe sur des centaines de plateformes publiques et affiche les URLs trouvees. Outil de reference pour l'OSINT username.",
+    "usage": "Entrez un username sans @ ni URL. Cliquez Executer. Les profils trouves s'affichent avec leur lien.",
+    "example": "Cible: johndoe",
+    "target": "Username (pseudo), sans espaces de preference.",
+    "tips": [
+      "Testez les variantes: johndoe, john_doe, johndoe99.",
+      "Les faux positifs existent: verifiez manuellement chaque URL."
+    ],
+    "github": "https://github.com/sherlock-project/sherlock"
+  },
+  "maigret": {
+    "summary": "Dossier username sur 3000+ sites.",
+    "what": "Maigret va plus loin que Sherlock: plus de sites, extraction de metadonnees et rapports HTML. Adapté aux dossiers complets sur une personne.",
+    "usage": "Entrez le username et lancez. Le scan peut prendre plusieurs minutes.",
+    "example": "Cible: janedoe",
+    "target": "Username unique.",
+    "tips": [
+      "Timeout eleve (10 min): patience sur les scans complets.",
+      "Les rapports peuvent etre generes dans le repertoire courant."
+    ],
+    "github": "https://github.com/soxoj/maigret"
+  },
+  "blackbird": {
+    "summary": "Username sur 600+ sites via WhatsMyName.",
+    "what": "Blackbird croise une base WhatsMyName pour limiter les faux positifs. Option IA disponible en CLI pour profiler les resultats.",
+    "usage": "Entrez un username et executez. Pour l'IA: python3 /opt/blackbird/blackbird.py --username cible --ai (cle API requise).",
+    "example": "Cible: pseudonyme123",
+    "target": "Username.",
+    "tips": [
+      "Export PDF possible en CLI avec --pdf.",
+      "Configurez l'IA via --setup-ai dans le terminal."
+    ],
+    "github": "https://github.com/p1ngul1n0/blackbird"
+  },
+  "social-analyzer-cli": {
+    "summary": "Analyse username sur 1000+ sites (CLI).",
+    "what": "Social Analyzer detecte des profils, extrait metadonnees et peut filtrer par pertinence. Version CLI pour automatisation.",
+    "usage": "Entrez un username. Le mode dashboard utilise --top 100 sites les plus populaires.",
+    "example": "Cible: johndoe",
+    "target": "Username.",
+    "tips": [
+      "Pour plus de sites, utilisez l'interface web Social Analyzer.",
+      "Scan long: augmentez le timeout si necessaire."
+    ],
+    "github": "https://github.com/qeeqbox/social-analyzer"
+  },
+  "socialscan": {
+    "summary": "Verification rapide sur les grandes plateformes.",
+    "what": "Socialscan verifie la disponibilite d'un username ou email sur les plateformes majeures avec peu de faux positifs.",
+    "usage": "Entrez username ou email et lancez. Resultat rapide (1-2 min).",
+    "example": "Cible: johndoe ou email@example.com",
+    "target": "Username ou adresse email.",
+    "tips": [
+      "Ideal en premiere passe avant Maigret ou Sherlock.",
+      "Moins exhaustif mais plus fiable sur les gros reseaux."
+    ],
+    "github": "https://github.com/megadose/socialscan"
+  },
+  "snscrape": {
+    "summary": "Scraping Twitter/X public sans API.",
+    "what": "Alternative moderne a twint (obsolete). Recupere tweets et metadonnees de profils publics Twitter/X.",
+    "usage": "Entrez le username Twitter sans @. Sortie JSON ligne par ligne.",
+    "example": "Cible: elonmusk",
+    "target": "Username Twitter/X (sans @).",
+    "tips": [
+      "Twitter/X change souvent ses protections: resultats variables.",
+      "twint n'est plus maintenu, preferer snscrape."
+    ],
+    "github": "https://github.com/JustAnotherArchivist/snscrape"
+  },
+  "holehe": {
+    "summary": "Comptes enregistres avec une adresse email.",
+    "what": "Holehe teste si un email est utilise sur des sites (Twitter, Instagram, etc.) via les flux de reinitialisation de mot de passe, sans envoyer d'email.",
+    "usage": "Entrez une adresse email complete et lancez.",
+    "example": "Cible: personne@gmail.com",
+    "target": "Adresse email valide.",
+    "tips": [
+      "N'affiche que les comptes detectes (--only-used).",
+      "Usage legal uniquement sur vos propres emails ou avec autorisation."
+    ],
+    "github": "https://github.com/megadose/holehe"
+  },
+  "h8mail": {
+    "summary": "Recherche d'email dans les fuites connues.",
+    "what": "h8mail cherche une adresse dans des bases de breaches publiques et services OSINT. Utile pour evaluer l'exposition d'un email.",
+    "usage": "Entrez l'email cible avec -t (deja configure dans le dashboard).",
+    "example": "Cible: victime@example.com",
+    "target": "Adresse email.",
+    "tips": [
+      "Certaines sources premium necessitent des cles API (configurer dans le terminal).",
+      "Ne confirmez pas une compromission sans verification supplementaire."
+    ],
+    "github": "https://github.com/khast3x/h8mail"
+  },
+  "blackbird-email": {
+    "summary": "Email enregistre sur 600+ plateformes.",
+    "what": "Meme moteur que Blackbird username, mais pour les adresses email.",
+    "usage": "Entrez l'email et executez.",
+    "example": "Cible: contact@entreprise.com",
+    "target": "Adresse email.",
+    "tips": [
+      "Croisez avec Holehe pour confirmation.",
+      "Export PDF: --pdf en CLI."
+    ],
+    "github": "https://github.com/p1ngul1n0/blackbird"
+  },
+  "ghunt-email": {
+    "summary": "Investigation Google via adresse Gmail.",
+    "what": "GHunt extrait des informations publiques liees a un compte Google: photos, YouTube, documents partages, etc.",
+    "usage": "Ces outils demandent une session Google. Ouvrez le terminal integre (bouton Terminal integre), lancez 'ghunt login' et suivez les etapes (methode par cookies recommandee). Une fois configure, la carte se deverrouille automatiquement.",
+    "example": "Cible: utilisateur@gmail.com",
+    "target": "Adresse Gmail ou Google.",
+    "tips": [
+      "Configuration: ghunt login (dans le terminal integre) avant utilisation.",
+      "Authentification obligatoire: ghunt login dans le terminal integre.",
+      "Respectez les conditions d'utilisation Google."
+    ],
+    "github": "https://github.com/mxrch/GHunt"
+  },
+  "ghunt-gaia": {
+    "summary": "Investigation Google via Gaia ID.",
+    "what": "Le Gaia ID est un identifiant numerique interne Google. GHunt peut pivoter dessus si vous l'avez obtenu via une recherche email.",
+    "usage": "Ces outils demandent une session Google. Ouvrez le terminal integre (bouton Terminal integre), lancez 'ghunt login' et suivez les etapes (methode par cookies recommandee). Une fois configure, la carte se deverrouille automatiquement.",
+    "example": "Cible: 123456789012345678901",
+    "target": "Gaia ID (nombre long).",
+    "tips": [
+      "Configuration: ghunt login (dans le terminal integre) avant utilisation.",
+      "Obtenez le Gaia ID via ghunt email prealablement.",
+      "Auth requise comme pour le module email."
+    ],
+    "github": "https://github.com/mxrch/GHunt"
+  },
+  "harvester": {
+    "summary": "Emails, sous-domaines et hotes a partir d'un nom de domaine.",
+    "what": "theHarvester interroge des moteurs et bases publiques pour recolter les emails, sous-domaines et hotes associes a un DOMAINE.",
+    "usage": "Entrez un nom de domaine (ex: acme.com), pas un email ni un username. Utilise uniquement des sources gratuites, sans cle API.",
+    "example": "theHarvester -d acme.com -b crtsh,hackertarget,otx",
+    "target": "Un nom de domaine (ex: acme.com).",
+    "tips": [
+      "Pour trouver le domaine d'une personne, partez d'un email (la partie apres @).",
+      "Les sources payantes (-b all) demandent des cles API dans /etc/theHarvester/api-keys.yaml et ne sont pas activees par defaut."
+    ],
+    "github": "https://github.com/laramies/theHarvester"
+  },
+  "subfinder": {
+    "summary": "Sous-domaines passifs via 50+ sources.",
+    "what": "Subfinder agrège des sources passives (crt.sh, VirusTotal, etc.) pour lister les sous-domaines sans envoyer de trafic direct a la cible.",
+    "usage": "Entrez le domaine racine.",
+    "example": "Cible: example.com",
+    "target": "Domaine apex (sans sous-domaine).",
+    "tips": [
+      "Passif uniquement: peu de risque legal en recon autorisée.",
+      "Pipe vers httpx pour verifier les hotes actifs."
+    ],
+    "github": "https://github.com/projectdiscovery/subfinder"
+  },
+  "amass": {
+    "summary": "Cartographie de surface d'attaque.",
+    "what": "OWASP Amass enumere sous-domaines, ASN, adresses IP et cartographie la surface d'attaque d'une organisation.",
+    "usage": "Mode passif preconfigure. Entrez le domaine.",
+    "example": "Cible: corp.example.com ou example.com",
+    "target": "Domaine autorise.",
+    "tips": [
+      "Scan long (10 min+).",
+      "Mode actif disponible en CLI: amass enum -d domaine (plus intrusif)."
+    ],
+    "github": "https://github.com/owasp-amass/amass"
+  },
+  "dnsx": {
+    "summary": "Resolution DNS rapide multi-records.",
+    "what": "dnsx (ProjectDiscovery) interroge A, AAAA, MX, NS, TXT, CNAME en masse avec performance elevee.",
+    "usage": "Entrez un domaine ou sous-domaine.",
+    "example": "Cible: mail.example.com",
+    "target": "Nom d'hote ou domaine.",
+    "tips": [
+      "Accepte aussi une liste de domaines en CLI via -l fichier.",
+      "Combine avec subfinder pour valider les sous-domaines."
+    ],
+    "github": "https://github.com/projectdiscovery/dnsx"
+  },
+  "gau": {
+    "summary": "URLs historiques d'un domaine.",
+    "what": "gau (GetAllUrls) recupere les URLs connues depuis Wayback Machine, Common Crawl et autres archives.",
+    "usage": "Entrez le domaine.",
+    "example": "Cible: example.com",
+    "target": "Domaine.",
+    "tips": [
+      "Utile pour trouver endpoints oublies ou parametres exposes.",
+      "Peut produire beaucoup de lignes: filtrez avec grep en terminal."
+    ],
+    "github": "https://github.com/lc/gau"
+  },
+  "phoneinfoga": {
+    "summary": "OSINT sur numeros de telephone.",
+    "what": "PhoneInfoga valide, localise (pays/operateur) et recherche des empreintes d'un numero dans des sources publiques.",
+    "usage": "Entrez le numero au format international avec indicatif.",
+    "example": "Cible: +33612345678",
+    "target": "Numero E.164 (+indicatif pays).",
+    "tips": [
+      "Format international recommande.",
+      "Ne permet pas de geolocaliser precisement un mobile sans autre source."
+    ],
+    "github": "https://github.com/sundowndev/phoneinfoga"
+  },
+  "ghosttrack": {
+    "summary": "Outil interactif IP, telephone et username.",
+    "what": "GhostTrack propose des menus pour rechercher des infos sur IP, numero ou username. Outil oriente Termux, usage interactif.",
+    "usage": "Ouvrez le terminal integre. La commande suggeree s'affiche automatiquement. Suivez les menus IP Tracker, Phone Tracker ou Username Tracker.",
+    "example": "cd /opt/GhostTrack && python3 GhostTR.py",
+    "target": "IP, numero ou username selon le menu.",
+    "tips": [
+      "Outil interactif: pas de mode batch via le dashboard.",
+      "En cas d'erreur urllib3: pip install \"urllib3<2\" dans le conteneur."
+    ],
+    "github": "https://github.com/HunxByts/GhostTrack"
+  },
+  "httpx": {
+    "summary": "Sonde HTTP: status, titre, technologies.",
+    "what": "httpx verifie si une URL repond, le code HTTP, le titre de page et les technologies detectees.",
+    "usage": "Entrez une URL complete avec http:// ou https://.",
+    "example": "Cible: https://example.com",
+    "target": "URL ou domaine (https:// recommande).",
+    "tips": [
+      "Rapide pour valider une liste de sous-domaines.",
+      "tech-detect identifie CMS, serveurs, etc."
+    ],
+    "github": "https://github.com/projectdiscovery/httpx"
+  },
+  "whatweb": {
+    "summary": "Fingerprinting de technologies web.",
+    "what": "WhatWeb identifie CMS, frameworks, serveurs, analytics et plugins a partir d'une URL.",
+    "usage": "Entrez l'URL du site.",
+    "example": "Cible: https://example.com",
+    "target": "URL web.",
+    "tips": [
+      "Plus detaille que httpx pour le fingerprinting pur.",
+      "Peut etre bruyant: plusieurs lignes de sortie."
+    ],
+    "github": "https://github.com/urbanadventurer/WhatWeb"
+  },
+  "katana": {
+    "summary": "Crawler web pour decouvrir URLs.",
+    "what": "Katana parcourt un site (profondeur configurable) pour lister liens, endpoints et assets.",
+    "usage": "Entrez l'URL de depart. Profondeur 2 preconfiguree.",
+    "example": "Cible: https://example.com",
+    "target": "URL de base.",
+    "tips": [
+      "Respectez robots.txt et autorisation de test.",
+      "Augmentez -d en CLI pour crawler plus profond."
+    ],
+    "github": "https://github.com/projectdiscovery/katana"
+  },
+  "nuclei": {
+    "summary": "Scan de vulnerabilites par templates.",
+    "what": "Nuclei execute des milliers de templates pour detecter CVE, misconfigurations et exposures sur une URL.",
+    "usage": "Entrez l'URL cible. Uniquement sur cibles autorisees.",
+    "example": "Cible: https://votre-lab.local",
+    "target": "URL ou IP avec protocole.",
+    "tips": [
+      "Usage strictement autorise sur vos actifs ou avec accord ecrit.",
+      "Premier lancement: telechargement des templates (peut etre lent)."
+    ],
+    "github": "https://github.com/projectdiscovery/nuclei"
+  },
+  "nmap": {
+    "summary": "Scan de ports et detection de services.",
+    "what": "Nmap identifie ports ouverts, versions de services et OS (selon options). Standard en audit reseau.",
+    "usage": "Entrez un hostname ou IP. Scan -sV preconfigure.",
+    "example": "Cible: scanme.nmap.org (cible de test officielle Nmap)",
+    "target": "IP, hostname ou domaine.",
+    "tips": [
+      "Illegal sans autorisation sur des tiers.",
+      "cap NET_RAW peut etre requis pour certains scans (voir docker-compose)."
+    ],
+    "github": "https://github.com/nmap/nmap"
+  },
+  "dig": {
+    "summary": "Interrogation DNS ANY.",
+    "what": "dig affiche les enregistrements DNS publics d'un nom de domaine.",
+    "usage": "Entrez un domaine ou sous-domaine.",
+    "example": "Cible: example.com",
+    "target": "Nom DNS.",
+    "tips": [
+      "ANY peut etre filtre par certains resolvers.",
+      "Essayez dig example.com MX en terminal pour un type specifique."
+    ],
+    "github": null
+  },
+  "whois": {
+    "summary": "Informations d'enregistrement de domaine.",
+    "what": "whois retourne registrar, dates, contacts (si non rediges) et nameservers.",
+    "usage": "Entrez un domaine ou une IP.",
+    "example": "Cible: example.com",
+    "target": "Domaine ou IP.",
+    "tips": [
+      "GDPR a reduit les contacts visibles sur beaucoup de TLD.",
+      "Croisez avec historique WHOIS si disponible."
+    ],
+    "github": null
+  },
+  "trufflehog": {
+    "summary": "Detection de secrets dans un depot Git.",
+    "what": "TruffleHog scanne l'historique Git pour cles API, tokens et mots de passe commites.",
+    "usage": "Entrez l'URL HTTPS d'un depot Git public.",
+    "example": "Cible: https://github.com/org/repo",
+    "target": "URL de depot Git.",
+    "tips": [
+      "Uniquement sur depots publics ou autorises.",
+      "Clone local possible: trufflehog filesystem /chemin"
+    ],
+    "github": "https://github.com/trufflesecurity/trufflehog"
+  },
+  "exiftool": {
+    "summary": "Metadonnees EXIF et fichiers.",
+    "what": "ExifTool extrait GPS, appareil photo, dates, auteur et metadonnees de PDF, images, videos, etc.",
+    "usage": "Ouvrez Fichiers (Filebrowser) depuis la barre laterale: le bouton vous amene directement dans le dossier 'uploads' du projet actif. Deposez-y votre image, puis revenez ici et entrez son chemin relatif (ex: uploads/photo.jpg).",
+    "example": "uploads/photo.jpg",
+    "target": "Chemin relatif au projet (ex: uploads/photo.jpg) ou chemin absolu dans /data.",
+    "tips": [
+      "Le dossier Fichiers et les outils partagent le meme stockage: tout fichier depose est analysable.",
+      "docker cp monfichier.jpg osint-labs:/data/",
+      "GPS dans EXIF peut reveler un lieu de prise de vue."
+    ],
+    "github": "https://github.com/exiftool/exiftool"
+  },
+  "filebrowser": {
+    "summary": "Gestionnaire de fichiers partage entre projets.",
+    "what": "Filebrowser permet de parcourir, uploader, telecharger et organiser les fichiers de tous vos projets OSINT depuis une interface web.",
+    "usage": "Ouvrir Filebrowser. Chaque dossier sous /projects correspond a un projet (exports, uploads, notes). Les outils CLI ecrivent dans le dossier du projet actif.",
+    "example": "Projet actif: mon-cas-abc123/exports/ pour les resultats de scan.",
+    "target": "Fichiers et dossiers du workspace projets.",
+    "tips": [
+      "Identifiants par defaut: admin / admin (changez-les a la premiere connexion).",
+      "Partage le volume Docker osint-data avec le conteneur principal."
+    ],
+    "github": "https://github.com/filebrowser/filebrowser"
+  },
+  "terminal": {
+    "summary": "Shell bash integre via xterm.js.",
+    "what": "Terminal complet dans le dashboard, connecte au conteneur OSINT Labs. Tous les outils CLI sont disponibles.",
+    "usage": "Cliquez Ouvrir ou le bouton Terminal integre dans la sidebar. Tapez vos commandes comme dans un shell Linux.",
+    "example": "sherlock user\nghunt login\nls /opt/osint/scripts-collection",
+    "target": "Commandes shell libres.",
+    "tips": [
+      "Bouton Reconnecter si la session se ferme.",
+      "Repertoire de travail par defaut: /data"
+    ],
+    "github": "https://github.com/tsl0922/ttyd"
+  },
+  "social-analyzer-web": {
+    "summary": "Interface web Social Analyzer.",
+    "what": "Version graphique pour rechercher un username sur des centaines de sites avec options de metadonnees et screenshots.",
+    "usage": "Ouvrir l'interface, saisir le username, choisir les options de scan et lancer.",
+    "example": "Username: johndoe, mode fast ou full selon l'interface.",
+    "target": "Username.",
+    "tips": [
+      "Premier demarrage: quelques secondes de chargement.",
+      "Version CLI disponible aussi dans le dashboard."
+    ],
+    "github": "https://github.com/qeeqbox/social-analyzer"
+  },
+  "webcheck": {
+    "summary": "Analyse complete d'un site web.",
+    "what": "Web-Check regroupe IP, SSL, DNS, cookies, headers, performance, trackers, carbon footprint et plus en une interface.",
+    "usage": "Ouvrir l'interface et entrer l'URL du site a analyser.",
+    "example": "URL: https://example.com",
+    "target": "URL de site web.",
+    "tips": [
+      "Service dans un conteneur dedie (webcheck).",
+      "Ideal pour audit rapide avant investigation approfondie."
+    ],
+    "github": "https://github.com/lissy93/web-check"
+  },
+  "awesome-osint": {
+    "summary": "Liste curatee de ressources OSINT.",
+    "what": "Clone local du repo awesome-osint: liens vers outils, APIs, techniques par categorie.",
+    "usage": "Ouvrez le terminal integre et consultez le README.",
+    "example": "less /opt/osint/awesome-osint/README.md",
+    "target": "Reference, pas de cible unique.",
+    "tips": [
+      "Recherchez dans le fichier avec /motcle en less.",
+      "Mettez a jour via rebuild Docker pour la derniere version."
+    ],
+    "github": "https://github.com/jivoi/awesome-osint"
+  },
+  "osint-scripts": {
+    "summary": "Collection de scripts OSINT divers.",
+    "what": "Depot cipher387/osint_stuff_tool_collection: petits scripts, bookmarklets et outils complementaires.",
+    "usage": "Explorez le dossier dans le terminal.",
+    "example": "ls /opt/osint/scripts-collection",
+    "target": "Scripts individuels selon le dossier choisi.",
+    "tips": [
+      "Lisez le README de chaque script avant execution.",
+      "Certains scripts necessitent des cles API externes."
+    ],
+    "github": "https://github.com/cipher387/osint_stuff_tool_collection"
+  },
+  "maigret-email": {
+    "summary": "Recherche d'emails a partir d'un pseudonyme, via Maigret.",
+    "what": "Maigret analyse des milliers de sites pour retrouver les profils d'un username, puis extrait automatiquement les identifiants exposes (emails, autres pseudos, noms).",
+    "usage": "Entrez un username. Les emails et identifiants trouves apparaissent dans la sortie du terminal (lignes 'Extracted').",
+    "example": "maigret johndoe --no-color",
+    "target": "Un pseudonyme (username).",
+    "tips": [
+      "Verifiez ensuite un email candidat avec l'outil holehe (categorie Email).",
+      "Aucun email n'est garanti: cela depend de ce que la cible a rendu public."
+    ],
+    "github": "https://github.com/soxoj/maigret"
+  }
+}
