@@ -1043,7 +1043,13 @@ body > * { position: relative; z-index: 1; }
 .chat-settings { display: grid; gap: 0.45rem; padding: 0.8rem; margin-bottom: 0.8rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); }
 .chat-settings label { color: var(--text-muted); font-size: 0.72rem; }
 .chat-settings input[type="text"], .chat-settings input[type="password"], .chat-compose textarea { width: 100%; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--bg-inset); color: var(--text); padding: 0.65rem; }
-.chat-check { display: flex; align-items: center; gap: 0.45rem; margin: 0.3rem 0; }
+.chat-switch { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; margin: 0.3rem 0; cursor: pointer; }
+.chat-switch input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.chat-switch-track { position: relative; width: 38px; height: 22px; flex: 0 0 auto; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg-inset); transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.chat-switch-track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--text-muted); transition: transform var(--dur) var(--ease-out), background-color var(--dur) var(--ease); }
+.chat-switch input:checked + .chat-switch-track { border-color: var(--signal); background: var(--signal-soft); }
+.chat-switch input:checked + .chat-switch-track::after { transform: translateX(16px); background: var(--signal-bright); }
+.chat-switch input:focus-visible + .chat-switch-track { outline: 2px solid var(--signal-line); outline-offset: 2px; }
 .chat-messages { flex: 1; min-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.65rem; }
 .chat-message { max-width: 92%; padding: 0.7rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); }
 .chat-message.is-user { align-self: flex-end; background: var(--bg-hover); }

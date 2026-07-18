@@ -124,6 +124,7 @@ def init_db() -> None:
                     provider TEXT NOT NULL DEFAULT 'openrouter',
                     model TEXT NOT NULL DEFAULT 'openai/gpt-4.1-mini',
                     api_key_ciphertext TEXT,
+                    web_search INTEGER NOT NULL DEFAULT 1,
                     updated_at TEXT
                 );
 
@@ -176,6 +177,9 @@ def init_db() -> None:
                 CREATE INDEX IF NOT EXISTS idx_challenge_progress_project ON challenge_progress(project_id, updated_at);
                 """
             )
+            ai_columns = {row["name"] for row in conn.execute("PRAGMA table_info(ai_settings)").fetchall()}
+            if "web_search" not in ai_columns:
+                conn.execute("ALTER TABLE ai_settings ADD COLUMN web_search INTEGER NOT NULL DEFAULT 1")
         _initialized = True
 
 
@@ -339,7 +343,7 @@ def reveal_secret(token: str, secret: str) -> str:
     return bytes(a ^ b for a, b in zip(cipher, stream)).decode("utf-8")
 
 
-def save_ai_settings(project_id: str, model: str, api_key: str | None, secret: str) -> dict:
+def save_ai_settings(project_id: str, model: str, api_key: str | None, secret: str, web_search: bool = True) -> dict:
     init_db()
     with _lock, _connect() as conn:
         current = conn.execute("SELECT api_key_ciphertext FROM ai_settings WHERE project_id = ?", (project_id,)).fetchone()
@@ -347,20 +351,20 @@ def save_ai_settings(project_id: str, model: str, api_key: str | None, secret: s
         if api_key:
             ciphertext = protect_secret(api_key, secret)
         conn.execute(
-            "INSERT INTO ai_settings(project_id, model, api_key_ciphertext, updated_at) VALUES (?, ?, ?, ?) "
-            "ON CONFLICT(project_id) DO UPDATE SET model=excluded.model, api_key_ciphertext=excluded.api_key_ciphertext, updated_at=excluded.updated_at",
-            (project_id, model, ciphertext, _now()),
+            "INSERT INTO ai_settings(project_id, model, api_key_ciphertext, web_search, updated_at) VALUES (?, ?, ?, ?, ?) "
+            "ON CONFLICT(project_id) DO UPDATE SET model=excluded.model, api_key_ciphertext=excluded.api_key_ciphertext, web_search=excluded.web_search, updated_at=excluded.updated_at",
+            (project_id, model, ciphertext, int(web_search), _now()),
         )
-    return {"provider": "openrouter", "model": model, "has_api_key": bool(ciphertext)}
+    return {"provider": "openrouter", "model": model, "has_api_key": bool(ciphertext), "web_search": web_search}
 
 
 def get_ai_settings(project_id: str, secret: str, include_key: bool = False) -> dict:
     init_db()
     with _lock, _connect() as conn:
         row = conn.execute("SELECT * FROM ai_settings WHERE project_id = ?", (project_id,)).fetchone()
-    result = {"provider": "openrouter", "model": "openai/gpt-4.1-mini", "has_api_key": False}
+    result = {"provider": "openrouter", "model": "openai/gpt-4.1-mini", "has_api_key": False, "web_search": True}
     if row:
-        result.update({"model": row["model"], "has_api_key": bool(row["api_key_ciphertext"])})
+        result.update({"model": row["model"], "has_api_key": bool(row["api_key_ciphertext"]), "web_search": bool(row["web_search"])})
         if include_key and row["api_key_ciphertext"]:
             result["api_key"] = reveal_secret(row["api_key_ciphertext"], secret)
     return result

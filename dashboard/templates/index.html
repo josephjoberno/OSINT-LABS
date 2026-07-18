@@ -364,7 +364,11 @@
             <input id="chat-api-key" type="password" autocomplete="off" placeholder="sk-or-v1-...">
             <label for="chat-model">Modele</label>
             <input id="chat-model" type="text" value="openai/gpt-4.1-mini" autocomplete="off">
-            <label class="chat-check"><input id="chat-web" type="checkbox"> Autoriser la recherche web</label>
+            <label class="chat-switch" for="chat-web">
+              <span>Recherche web</span>
+              <input id="chat-web" type="checkbox" role="switch" checked>
+              <span class="chat-switch-track" aria-hidden="true"></span>
+            </label>
             <button class="btn btn-secondary btn-sm" type="submit">Enregistrer</button>
           </form>
           <div class="chat-messages" id="chat-messages">

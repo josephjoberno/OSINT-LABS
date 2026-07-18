@@ -648,7 +648,9 @@ def api_ai_settings():
         return jsonify({"error": "Modele OpenRouter invalide"}), 400
     if api_key and (len(api_key) > 1000 or not api_key.startswith("sk-or-")):
         return jsonify({"error": "Cle OpenRouter invalide"}), 400
-    settings = db.save_ai_settings(project["id"], model, api_key, _ai_secret())
+    settings = db.save_ai_settings(
+        project["id"], model, api_key, _ai_secret(), payload.get("web_search") is not False,
+    )
     return jsonify(settings)
 
 
@@ -665,7 +667,8 @@ def api_project_chat():
     payload = request.get_json(silent=True) or {}
     thread_id = str(payload.get("thread_id", thread_id)).strip()[:80] or "default"
     prompt = str(payload.get("message", "")).strip()
-    web_search = payload.get("web_search") is True
+    settings = db.get_ai_settings(project["id"], _ai_secret())
+    web_search = payload.get("web_search", settings.get("web_search", True)) is True
     if not prompt:
         return jsonify({"error": "Message obligatoire"}), 400
     if len(prompt) > 12000:
