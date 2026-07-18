@@ -122,6 +122,24 @@ Le terminal intégré donne accès à un shell dans le conteneur. Ne publiez pas
 
 Les outils de phishing, de vol de credentials, d'exploitation et de contournement ne font pas partie du projet.
 
+## Avertissement juridique
+
+OSINT Labs est fourni uniquement à des fins légales de recherche, de journalisme, de sécurité défensive, de vérification, de formation et d'investigation autorisée.
+
+En utilisant ce logiciel, vous acceptez de:
+
+- consulter uniquement des informations publiques auxquelles vous êtes légalement autorisé à accéder
+- obtenir le consentement ou disposer d'une base légale lorsque la réglementation l'exige
+- respecter la vie privée, les conditions d'utilisation des plateformes, le droit d'auteur et les lois applicables dans votre juridiction
+- vérifier les résultats avant toute conclusion, car les correspondances peuvent être incomplètes, obsolètes ou incorrectes
+- protéger les données collectées, limiter leur conservation et les supprimer lorsqu'elles ne sont plus nécessaires
+
+Il est interdit d'utiliser OSINT Labs pour harceler, traquer, menacer, discriminer, doxer une personne, usurper une identité, contourner une protection, accéder sans autorisation à un système ou publier des données personnelles de manière abusive.
+
+Les auteurs et contributeurs ne cautionnent aucun usage illégal ou contraire à l'éthique. Ils ne sont pas responsables des actions des utilisateurs ni des dommages résultant de l'utilisation du logiciel. Les outils et services tiers restent soumis à leurs propres licences, règles et conditions d'utilisation.
+
+Ce document ne constitue pas un conseil juridique. En cas de doute, consultez un professionnel qualifié dans votre juridiction avant de commencer une investigation.
+
 ## Contribution
 
 Consultez [CONTRIBUTING.md](CONTRIBUTING.md). Les contributions doivent rester dans un cadre OSINT légal, passif et respectueux de la vie privée.
